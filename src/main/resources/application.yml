@@ -1,0 +1,36 @@
+### Common
+---
+server:
+  port: 8000
+
+spring:
+  application:
+    name: Dokanee-Backend-Monolithic
+  profiles:
+    active: pgsql
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update
+  liquibase:
+    change-log: "classpath:/db.changelog/db.changelog-master.yml"
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+---
+
+---
+
+### PgSQL profile
+
+spring:
+  profiles: pgsql
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/zaatun-e-commerce}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12211221}
+
+---
+
