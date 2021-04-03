@@ -3,6 +3,7 @@ package com.zaatun.zaatunecommerce.service;
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.CategoryModel;
+import com.zaatun.zaatunecommerce.model.SubCategoryModel;
 import com.zaatun.zaatunecommerce.repository.CategoryRepository;
 import com.zaatun.zaatunecommerce.repository.SubCategoryRepository;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ public class CategoryImageService {
 
         Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
 
-        if(categoryModelOptional.isPresent()){
+        if (categoryModelOptional.isPresent()) {
             CategoryModel categoryModel = categoryModelOptional.get();
 
             MultipartFile[] multipartFiles = new MultipartFile[1];
@@ -43,8 +44,7 @@ public class CategoryImageService {
             categoryRepository.save(categoryModel);
 
             return new ResponseEntity<>(new ApiResponse<>(201, "Image Uploaded", imageUrl.get(0)), HttpStatus.CREATED);
-        }
-        else {
+        } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Category found with this category Id");
         }
     }
@@ -52,7 +52,7 @@ public class CategoryImageService {
     public ResponseEntity<ApiResponse<String>> deleteCategoryImage(String categoryId, String token) {
         Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
 
-        if(categoryModelOptional.isPresent()){
+        if (categoryModelOptional.isPresent()) {
             CategoryModel categoryModel = categoryModelOptional.get();
 
             categoryModel.setCategoryImage(null);
@@ -62,8 +62,68 @@ public class CategoryImageService {
             categoryRepository.save(categoryModel);
 
             return new ResponseEntity<>(new ApiResponse<>(200, "Image Deleted Successful", null), HttpStatus.OK);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Category found with this category Id");
         }
-        else {
+    }
+
+    public ResponseEntity<ApiResponse<String>> uploadSubCategoryImage(String categoryId, MultipartFile mpFile, String token, String subCategoryId) {
+        Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
+
+        if (categoryModelOptional.isPresent()) {
+            CategoryModel categoryModel = categoryModelOptional.get();
+
+            Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(subCategoryId);
+
+            if (subCategoryModelOptional.isPresent() && categoryModel.getSubCategories().contains(subCategoryModelOptional.get())) {
+                SubCategoryModel subCategoryModel = subCategoryModelOptional.get();
+
+                MultipartFile[] multipartFiles = new MultipartFile[1];
+                multipartFiles[0] = mpFile;
+                List<String> imageUrl = imageUtilService.uploadImage(multipartFiles);
+
+                subCategoryModel.setSubCategoryImage(imageUrl.get(0));
+                subCategoryModel.setUpdateBy(jwtProvider.getNameFromJwt(token));
+                subCategoryModel.setUpdateTime(System.currentTimeMillis());
+
+                subCategoryRepository.save(subCategoryModel);
+
+                return new ResponseEntity<>(new ApiResponse<>(201, "Image Uploaded", imageUrl.get(0)), HttpStatus.CREATED);
+
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No SubCategory found with this SubCategory Id");
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Category found with this category Id");
+        }
+    }
+
+    public ResponseEntity<ApiResponse<String>> deleteSubCategoryImage(String categoryId,String  token, String subCategoryId) {
+        Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
+
+        if (categoryModelOptional.isPresent()) {
+            CategoryModel categoryModel = categoryModelOptional.get();
+
+            Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(subCategoryId);
+
+            if (subCategoryModelOptional.isPresent() ) {
+                SubCategoryModel subCategoryModel = subCategoryModelOptional.get();
+
+                if(categoryModel.getSubCategories().contains(subCategoryModel)){
+                    subCategoryModel.setSubCategoryImage(null);
+                    subCategoryModel.setUpdateBy(jwtProvider.getNameFromJwt(token));
+                    subCategoryModel.setUpdateTime(System.currentTimeMillis());
+
+                    subCategoryRepository.save(subCategoryModel);
+
+                    return new ResponseEntity<>(new ApiResponse<>(201, "Image Uploaded", subCategoryId), HttpStatus.CREATED);
+
+                }
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Subcategory is not under this category");
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No SubCategory found with this SubCategory Id");
+
+        } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Category found with this category Id");
         }
     }

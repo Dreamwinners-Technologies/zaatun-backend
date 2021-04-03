@@ -77,5 +77,19 @@ public class CategoryController {
         return categoryService.deleteSubCategory(token, categoryId, subCategoryId);
     }
 
+    @PostMapping("{categoryId}/subCategories/image/{subCategoryId}")
+    public ResponseEntity<ApiResponse<String>> addSubCategoryImage(@RequestHeader(name = "Authorization") String token,
+                                                                   @PathVariable String categoryId, MultipartFile mpFile, @
+                                                                               PathVariable String subCategoryId){
+        return categoryImageService.uploadSubCategoryImage(categoryId, mpFile, token, subCategoryId);
+    }
+
+    @DeleteMapping("{categoryId}/subCategories/image/{subCategoryId}")
+    public ResponseEntity<ApiResponse<String>> deleteSubCategoryImage(@RequestHeader(name = "Authorization") String token,
+                                                                      @PathVariable String categoryId,
+                                                                      @PathVariable String subCategoryId){
+        return categoryImageService.deleteSubCategoryImage(categoryId, token, subCategoryId);
+    }
+
 
 }

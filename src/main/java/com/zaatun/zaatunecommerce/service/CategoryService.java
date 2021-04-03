@@ -101,23 +101,34 @@ public class CategoryService {
 
     public ResponseEntity<ApiResponse<String>> editSubCategory(String token, SubCategoryAddEditRequest subCategoryAddEditRequest,
                                                                String categoryId, String subCategoryId) {
-        Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(subCategoryId);
+        Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
 
-        if (subCategoryModelOptional.isPresent()) {
-            SubCategoryModel subCategoryModel = subCategoryModelOptional.get();
+        if (categoryModelOptional.isPresent()) {
+            CategoryModel categoryModel = categoryModelOptional.get();
+            Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(subCategoryId);
 
-            subCategoryModel.setSubCategoryName(subCategoryAddEditRequest.getSubCategoryName());
-            subCategoryModel.setSubCategoryIcon(subCategoryAddEditRequest.getSubCategoryIcon());
-            subCategoryModel.setUpdateBy(jwtProvider.getNameFromJwt(token));
-            subCategoryModel.setUpdateTime(System.currentTimeMillis());
+            if (subCategoryModelOptional.isPresent()) {
+                SubCategoryModel subCategoryModel = subCategoryModelOptional.get();
 
-            subCategoryRepository.save(subCategoryModel);
+                if (categoryModel.getSubCategories().contains(subCategoryModel)) {
+                    subCategoryModel.setSubCategoryName(subCategoryAddEditRequest.getSubCategoryName());
+                    subCategoryModel.setSubCategoryIcon(subCategoryAddEditRequest.getSubCategoryIcon());
+                    subCategoryModel.setUpdateBy(jwtProvider.getNameFromJwt(token));
+                    subCategoryModel.setUpdateTime(System.currentTimeMillis());
 
-            return new ResponseEntity<>(new ApiResponse<>(200, "Sub Category Edit SuccessFul",
-                    subCategoryModel.getSubCategoryId()), HttpStatus.OK);
+                    subCategoryRepository.save(subCategoryModel);
+
+                    return new ResponseEntity<>(new ApiResponse<>(200, "Sub Category Edit SuccessFul",
+                            subCategoryModel.getSubCategoryId()), HttpStatus.OK);
+                }
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Subcategory is not under this category");
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No SubCategory found with this Sub Category Id");
+            }
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No SubCategory found with this Sub Category Id");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Category found with this category Id");
         }
+
     }
 
     public ResponseEntity<ApiResponse<String>> deleteCategory(String categoryId) {
@@ -141,10 +152,10 @@ public class CategoryService {
             Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(subCategoryId);
 
             List<SubCategoryModel> subCategoryModels = categoryModel.getSubCategories();
-            if (subCategoryModelOptional.isPresent() ) {
+            if (subCategoryModelOptional.isPresent()) {
                 SubCategoryModel subCategoryModel = subCategoryModelOptional.get();
 
-                if(subCategoryModels.contains(subCategoryModel)){
+                if (subCategoryModels.contains(subCategoryModel)) {
                     subCategoryModels.remove(subCategoryModel);
 
                     categoryRepository.save(categoryModel);
