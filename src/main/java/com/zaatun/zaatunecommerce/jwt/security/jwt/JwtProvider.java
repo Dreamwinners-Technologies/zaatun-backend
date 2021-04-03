@@ -40,9 +40,10 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject((claims.getSubject()))
+                .claim("name", userPrincipal.getName())
                 .claim("scopes", authorities)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpiration * 1000))
+                .setExpiration(new Date((new Date()).getTime() + jwtExpiration * 1000L))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
 
@@ -67,22 +68,6 @@ public class JwtProvider {
         return false;
     }
 
-    public String getUserNameFromJwt(String token) {
-        try {
-            token = token.split("\\s+")[1];
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "There is a problem in JWT Token");
-        }
-        try {
-            return Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(token)
-                    .getBody().getSubject();
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "There is a problem in JWT Token");
-        }
-    }
-
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser()
                 .setSigningKey(jwtSecret)
@@ -90,14 +75,36 @@ public class JwtProvider {
                 .getBody().getSubject();
     }
 
-    public String getRolesFromJwt(String token) {
+    public String getUserNameFromJwt(String bearerToken) {
         try {
-            token = token.split("\\s+")[1];
+            bearerToken = bearerToken.split("\\s+")[1];
+
+            return Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(bearerToken)
+                    .getBody().getSubject();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "There is a problem in JWT Token");
         }
+    }
 
+    public String getNameFromJwt(String bearerToken) {
         try {
+            bearerToken = bearerToken.split("\\s+")[1];
+
+            return Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(bearerToken)
+                    .getBody().get("name").toString();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "There is a problem in JWT Token");
+        }
+    }
+
+    public String getRolesFromJwt(String token) {
+        try {
+            token = token.split("\\s+")[1];
+
             return Jwts.parser()
                     .setSigningKey(jwtSecret)
                     .parseClaimsJws(token)

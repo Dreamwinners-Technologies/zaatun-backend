@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 public class UserPrinciple implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private final String id;
 
-    private String name;
+    private final String name;
 
-    private String username;
+    private final String username;
 
-    private String email;
+    private final String email;
     private Set<Role> roles = new HashSet<>();
 
     public UserPrinciple(String id, String name, Set<Role> roles,
@@ -35,9 +35,9 @@ public class UserPrinciple implements UserDetails {
     }
 
     @JsonIgnore
-    private String password;
+    private final String password;
 
-    private Collection<? extends GrantedAuthority> authorities;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrinciple build(UserModel user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
