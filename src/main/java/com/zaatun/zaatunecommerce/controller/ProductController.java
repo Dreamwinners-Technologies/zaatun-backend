@@ -12,9 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.sql.ResultSet;
+import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @AllArgsConstructor
@@ -55,5 +57,11 @@ public class ProductController {
         return productService.deleteProduct( productId);
     }
 
+    @PostMapping("/image/{productId}")
+    public ResponseEntity<ApiResponse<List<String>>> addProductImages(@RequestHeader(name = "Authorization") String token,
+                                                                      @PathVariable String productId,
+                                                                      MultipartFile[] mpFiles){
+        return productService.addProductImages(token, productId, mpFiles);
+    }
 
 }

@@ -18,6 +18,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
@@ -33,6 +34,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
+    private final ImageUtilService imageUtilService;
 
 
     public ResponseEntity<ApiResponse<String>> addProduct(String token, AddProductRequest addProductRequest) {
@@ -185,5 +187,27 @@ public class ProductService {
 
         return new ResponseEntity<>(new ApiResponse<>(201, "Product Delete Successful", productId), HttpStatus.CREATED);
 
+    }
+
+    public ResponseEntity<ApiResponse<List<String>>> addProductImages(String token, String productId, MultipartFile[] mpFiles) {
+
+
+        Optional<ProductModel> productModelOptional = productRepository.findById(productId);
+
+        if(productModelOptional.isPresent()){
+            List<String> imageLinks = imageUtilService.uploadImage(mpFiles);
+
+            BasicTableInfo basicTableInfo = utilService.generateBasicTableInfo("",token);
+
+            ProductModel productModel = productModelOptional.get();
+
+            productModel.setUpdatedBy(basicTableInfo.getCreateBy());
+            productModel.setUpdatedOn(basicTableInfo.getCreationTime());
+            productModel.setProductImages(imageLinks);
+
+            productRepository.save(productModel);
+
+            return new ResponseEntity<>(new ApiResponse<>(200, "Image Uploaded", imageLinks), HttpStatus.OK);
+        }
     }
 }
