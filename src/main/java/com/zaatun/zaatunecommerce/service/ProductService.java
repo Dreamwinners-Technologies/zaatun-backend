@@ -194,10 +194,10 @@ public class ProductService {
 
         Optional<ProductModel> productModelOptional = productRepository.findById(productId);
 
-        if(productModelOptional.isPresent()){
+        if (productModelOptional.isPresent()) {
             List<String> imageLinks = imageUtilService.uploadImage(mpFiles);
 
-            BasicTableInfo basicTableInfo = utilService.generateBasicTableInfo("",token);
+            BasicTableInfo basicTableInfo = utilService.generateBasicTableInfo("", token);
 
             ProductModel productModel = productModelOptional.get();
 
@@ -209,5 +209,6 @@ public class ProductService {
 
             return new ResponseEntity<>(new ApiResponse<>(200, "Image Uploaded", imageLinks), HttpStatus.OK);
         }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found");
     }
 }
