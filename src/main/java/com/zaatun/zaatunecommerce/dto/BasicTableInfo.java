@@ -12,6 +12,8 @@ public class BasicTableInfo {
 
     private String slug;
 
+    private String SKU;
+
     private String createBy;
 
     private Long creationTime;

@@ -16,7 +16,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/categories/")
+@RequestMapping("/api/dashboard/categories/")
 public class CategoryController {
     private final CategoryService categoryService;
     private final CategoryImageService categoryImageService;

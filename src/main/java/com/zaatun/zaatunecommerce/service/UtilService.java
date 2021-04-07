@@ -3,7 +3,9 @@ package com.zaatun.zaatunecommerce.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
+import com.zaatun.zaatunecommerce.dto.request.ProductQuantityRequest;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
+import com.zaatun.zaatunecommerce.model.ProductQuantityModel;
 import lombok.AllArgsConstructor;
 import org.cloudinary.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,8 +36,24 @@ public class UtilService {
 //        createBy = jwtProvider.getNameFromJwt(token);
         Long creationTime = System.currentTimeMillis();
 
-        return new BasicTableInfo(id, slug, createBy, creationTime);
+        String SKU = UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0, 10);
 
+        return new BasicTableInfo(id, slug, SKU, createBy, creationTime);
+
+    }
+
+    public List<ProductQuantityModel> getQuantityModelFromQuantityList(List<ProductQuantityRequest> productQuantityRequests){
+        List<ProductQuantityModel> productQuantityModels = new ArrayList<>();
+
+        for (ProductQuantityRequest productQuantityRequest: productQuantityRequests){
+            ProductQuantityModel productQuantityModel = new ProductQuantityModel();
+            productQuantityModel.setVariant(productQuantityRequest.getVariant());
+            productQuantityModel.setQuantity(productQuantityRequest.getQuantity());
+
+            productQuantityModels.add(productQuantityModel);
+        }
+
+        return productQuantityModels;
     }
 
 
