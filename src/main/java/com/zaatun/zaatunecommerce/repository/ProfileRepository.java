@@ -1,6 +1,6 @@
-package com.zaatun.zaatunecommerce.jwt.repository;
+package com.zaatun.zaatunecommerce.repository;
 
-import com.zaatun.zaatunecommerce.jwt.model.ProfileModel;
+import com.zaatun.zaatunecommerce.model.ProfileModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

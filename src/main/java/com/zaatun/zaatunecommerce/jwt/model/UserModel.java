@@ -1,12 +1,10 @@
 package com.zaatun.zaatunecommerce.jwt.model;
 
 
+import com.zaatun.zaatunecommerce.model.ProfileModel;
 import lombok.*;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.validator.constraints.Range;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.HashSet;

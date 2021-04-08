@@ -16,7 +16,6 @@ public class SignUpForm {
 
     @NotBlank
     @Size(max = 60)
-    @Email
     private String emailOrPhone;
 
     @NotBlank

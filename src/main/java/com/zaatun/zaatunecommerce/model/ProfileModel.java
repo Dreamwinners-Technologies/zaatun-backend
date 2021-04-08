@@ -1,4 +1,4 @@
-package com.zaatun.zaatunecommerce.jwt.model;
+package com.zaatun.zaatunecommerce.model;
 
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
@@ -8,6 +8,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -50,4 +51,7 @@ public class ProfileModel {
     private String thana;
 
     private String district;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<DeliveryAddressModel> deliveryAddresses;
 }
