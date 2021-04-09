@@ -1,17 +1,12 @@
 package com.zaatun.zaatunecommerce.dto.response.shop;
 
-import com.zaatun.zaatunecommerce.model.CategoryModel;
-import com.zaatun.zaatunecommerce.model.ProductQuantityModel;
+import com.zaatun.zaatunecommerce.model.ProductVariantModel;
 import com.zaatun.zaatunecommerce.model.ProductReviewModel;
-import com.zaatun.zaatunecommerce.model.SubCategoryModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Getter
@@ -58,7 +53,7 @@ public class ShopProductResponse {
 
     private List<String> productImages;
 
-    private List<ProductQuantityModel> quantity;
+    private List<ProductVariantModel> quantity;
 
     private List<ProductReviewModel> productReviews;
 

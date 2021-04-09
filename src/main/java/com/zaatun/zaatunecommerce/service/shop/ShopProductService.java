@@ -83,7 +83,7 @@ public class ShopProductService {
                     productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
                     productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
                     productModel.getIsAvailable(), productModel.getVideoUrl(), productModel.getAffiliatePercentage(),
-                    productModel.getVat(), productModel.getProductImages(), productModel.getQuantity(),
+                    productModel.getVat(), productModel.getProductImages(), productModel.getVariants(),
                     productModel.getProductReviews(), productModel.getProcessor(), productModel.getBattery(),
                     productModel.getRam(), productModel.getRom(), productModel.getScreenSize(),
                     productModel.getBackCamera(), productModel.getFrontCamera());

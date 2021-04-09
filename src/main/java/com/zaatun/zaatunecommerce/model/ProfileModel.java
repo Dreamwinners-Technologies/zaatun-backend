@@ -54,4 +54,8 @@ public class ProfileModel {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<DeliveryAddressModel> deliveryAddresses;
+
+    private Integer totalOrders;
+
+    private Integer totalOrderAmounts;
 }

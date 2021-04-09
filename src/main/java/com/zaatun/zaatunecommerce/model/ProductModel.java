@@ -80,7 +80,7 @@ public class ProductModel {
     private List<String> productImages;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<ProductQuantityModel> quantity;
+    private List<ProductVariantModel> variants;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<ProductReviewModel> productReviews;

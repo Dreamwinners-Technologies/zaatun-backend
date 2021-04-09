@@ -1,11 +1,8 @@
 package com.zaatun.zaatunecommerce.dto.request;
 
-import com.zaatun.zaatunecommerce.model.ProductQuantityModel;
-import com.zaatun.zaatunecommerce.model.ProductReviewModel;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -55,7 +52,7 @@ public class AddProductRequest {
 
     private Double vat;
 
-    private List<ProductQuantityRequest> quantity;
+    private List<ProductQuantityRequest> variants;
 
     private String processor;
 

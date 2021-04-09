@@ -51,7 +51,7 @@ public class ProductEditRequest {
 
     private Double vat;
 
-    private List<ProductQuantityRequest> quantity;
+    private List<ProductQuantityRequest> variants;
 
     private String processor;
 

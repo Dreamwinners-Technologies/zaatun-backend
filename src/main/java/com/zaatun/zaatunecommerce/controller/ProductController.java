@@ -6,16 +6,12 @@ import com.zaatun.zaatunecommerce.dto.request.ProductEditRequest;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
 import com.zaatun.zaatunecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.sql.ResultSet;
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")

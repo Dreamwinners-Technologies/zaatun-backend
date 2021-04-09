@@ -67,7 +67,7 @@ public class ProductService {
                     .videoUrl(addProductRequest.getVideoUrl())
                     .affiliatePercentage(addProductRequest.getAffiliatePercentage())
                     .vat(addProductRequest.getVat())
-                    .quantity(utilService.getQuantityModelFromQuantityList(addProductRequest.getQuantity()))
+                    .variants(utilService.getQuantityModelFromQuantityList(addProductRequest.getVariants()))
                     .processor(addProductRequest.getProcessor())
                     .battery(addProductRequest.getBattery())
                     .ram(addProductRequest.getRam())
@@ -163,7 +163,7 @@ public class ProductService {
                 productModel.setVideoUrl(productEditRequest.getVideoUrl());
                 productModel.setAffiliatePercentage(productEditRequest.getAffiliatePercentage());
                 productModel.setVat(productEditRequest.getVat());
-                productModel.setQuantity(utilService.getQuantityModelFromQuantityList(productEditRequest.getQuantity()));
+                productModel.setVariants(utilService.getQuantityModelFromQuantityList(productEditRequest.getVariants()));
                 productModel.setProcessor(productEditRequest.getProcessor());
                 productModel.setBattery(productEditRequest.getBattery());
                 productModel.setRam(productEditRequest.getRam());

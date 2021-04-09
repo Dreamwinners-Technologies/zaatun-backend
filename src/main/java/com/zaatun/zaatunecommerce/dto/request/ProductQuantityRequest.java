@@ -12,5 +12,5 @@ import lombok.Setter;
 public class ProductQuantityRequest {
     private String variant;
 
-    private Long quantity;
+    private Integer quantity;
 }

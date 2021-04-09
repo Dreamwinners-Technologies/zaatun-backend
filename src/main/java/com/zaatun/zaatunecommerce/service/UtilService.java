@@ -1,24 +1,14 @@
 package com.zaatun.zaatunecommerce.service;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.ProductQuantityRequest;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
-import com.zaatun.zaatunecommerce.model.ProductQuantityModel;
+import com.zaatun.zaatunecommerce.model.ProductVariantModel;
 import lombok.AllArgsConstructor;
-import org.cloudinary.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -42,18 +32,18 @@ public class UtilService {
 
     }
 
-    public List<ProductQuantityModel> getQuantityModelFromQuantityList(List<ProductQuantityRequest> productQuantityRequests){
-        List<ProductQuantityModel> productQuantityModels = new ArrayList<>();
+    public List<ProductVariantModel> getQuantityModelFromQuantityList(List<ProductQuantityRequest> productQuantityRequests){
+        List<ProductVariantModel> productVariantModels = new ArrayList<>();
 
         for (ProductQuantityRequest productQuantityRequest: productQuantityRequests){
-            ProductQuantityModel productQuantityModel = new ProductQuantityModel();
-            productQuantityModel.setVariant(productQuantityRequest.getVariant());
-            productQuantityModel.setQuantity(productQuantityRequest.getQuantity());
+            ProductVariantModel productVariantModel = new ProductVariantModel();
+            productVariantModel.setVariant(productQuantityRequest.getVariant());
+            productVariantModel.setQuantity(productQuantityRequest.getQuantity());
 
-            productQuantityModels.add(productQuantityModel);
+            productVariantModels.add(productVariantModel);
         }
 
-        return productQuantityModels;
+        return productVariantModels;
     }
 
 

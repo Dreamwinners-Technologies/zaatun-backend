@@ -12,12 +12,14 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table
-public class ProductQuantityModel {
+public class ProductVariantModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String variant;
 
-    private Long quantity;
+    private Integer quantity;
+
+    private Boolean inStock;
 }
