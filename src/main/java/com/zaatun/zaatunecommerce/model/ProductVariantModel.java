@@ -11,7 +11,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table
+@Table(name = "product_quantity_model")
 public class ProductVariantModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

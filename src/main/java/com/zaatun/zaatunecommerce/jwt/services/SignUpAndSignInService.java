@@ -71,6 +71,8 @@ public class SignUpAndSignInService {
                 .phoneNo(phone)
                 .email(email)
                 .username(userName)
+                .totalOrderAmounts(0)
+                .totalOrders(0)
                 .build();
 
         UserModel userModel = UserModel.builder()

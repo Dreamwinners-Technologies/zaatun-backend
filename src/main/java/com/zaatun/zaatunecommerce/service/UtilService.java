@@ -23,7 +23,7 @@ public class UtilService {
         String slug = name.toLowerCase().replace(" ", "-")
                 + "-" + id.substring(0, 4);
         String createBy = null;
-//        createBy = jwtProvider.getNameFromJwt(token);
+        createBy = jwtProvider.getNameFromJwt(token);
         Long creationTime = System.currentTimeMillis();
 
         String SKU = UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0, 10);

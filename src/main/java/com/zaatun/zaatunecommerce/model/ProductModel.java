@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -87,7 +88,7 @@ public class ProductModel {
 
     @CollectionTable
     @ElementCollection
-    private List<String> buyersId;
+    private Set<String> buyersId;
 
     private String processor;
 

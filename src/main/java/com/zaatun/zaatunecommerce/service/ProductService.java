@@ -75,6 +75,7 @@ public class ProductService {
                     .screenSize(addProductRequest.getScreenSize())
                     .backCamera(addProductRequest.getBackCamera())
                     .frontCamera(addProductRequest.getFrontCamera())
+                    .totalSold(0L)
                     .build();
 
             productRepository.save(productModel);
