@@ -2,15 +2,12 @@ package com.zaatun.zaatunecommerce.dto.response.shop;
 
 import com.zaatun.zaatunecommerce.model.CouponModel;
 import com.zaatun.zaatunecommerce.model.DeliveryAddressModel;
-import com.zaatun.zaatunecommerce.model.OrderProductModel;
+import com.zaatun.zaatunecommerce.model.OrderProcessHistoryModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import java.util.List;
 
 @Getter
@@ -52,6 +49,7 @@ public class ShopOrderResponse {
 
     private String transactionId;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private CouponModel couponModel;
+
+    private List<ShopOrderProcessHistory> orderProcessHistory;
 }

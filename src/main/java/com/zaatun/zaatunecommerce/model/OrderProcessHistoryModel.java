@@ -11,7 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "order_status_history_model")
-public class OrderStatusHistoryModel {
+public class OrderProcessHistoryModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

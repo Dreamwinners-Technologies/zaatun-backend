@@ -1,6 +1,7 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderProductRequest;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistory;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.*;
@@ -185,5 +186,18 @@ public class ShopOrderServiceExtended {
             productVariantIdList.add(productVariantModel.getId());
         }
         return productVariantIdList;
+    }
+
+
+    List<ShopOrderProcessHistory> orderProcessHistoryForShop(OrderModel orderModel) {
+        List<ShopOrderProcessHistory> shopOrderProcessHistories = new ArrayList<>();
+        for (OrderProcessHistoryModel orderProcessHistory: orderModel.getOrderProcessHistory()){
+            ShopOrderProcessHistory shopOrderProcessHistory =
+                    new ShopOrderProcessHistory(orderProcessHistory.getUpdateBy(), orderProcessHistory.getUpdatedOn(),
+                            orderProcessHistory.getOrderStatus(), orderProcessHistory.getCustomerNote());
+
+            shopOrderProcessHistories.add(shopOrderProcessHistory);
+        }
+        return shopOrderProcessHistories;
     }
 }

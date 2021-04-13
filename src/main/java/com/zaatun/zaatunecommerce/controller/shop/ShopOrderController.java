@@ -24,7 +24,7 @@ public class ShopOrderController {
     @GetMapping
     public ResponseEntity getOrderInfos(@RequestHeader(name = "Authorization") String token,
                                         @RequestParam(defaultValue = "0") Integer pageNo,
-                                        @RequestParam(defaultValue = "0") Integer pageSize){
+                                        @RequestParam(defaultValue = "30") Integer pageSize){
 
         return shopOrderService.getOrderInfos(token, pageNo, pageSize);
     }

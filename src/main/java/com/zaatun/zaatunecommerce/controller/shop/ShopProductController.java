@@ -26,7 +26,7 @@ public class ShopProductController {
                                                                                                   String rom, String screenSize, String backCamera, String frontCamera,
                                                                                                   @RequestParam(defaultValue = "createdOn") String sortBy,
                                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction orderBy,
-                                                                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                                                                  @RequestParam(defaultValue = "50") int pageSize,
                                                                                                   @RequestParam(defaultValue = "0") int pageNo,
                                                                                                   @RequestParam(required = false) Integer rating ){
 

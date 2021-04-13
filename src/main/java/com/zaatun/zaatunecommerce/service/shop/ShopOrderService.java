@@ -3,6 +3,9 @@ package com.zaatun.zaatunecommerce.service.shop;
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderPlaceRequest;
+import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistory;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
@@ -59,8 +62,8 @@ public class ShopOrderService {
 
                     List<OrderProductModel> orderProductModelList =
                             shopOrderServiceExtended.fromProductIdListToProductList(orderPlaceRequest.getProducts(), token);
-                    List<OrderStatusHistoryModel> orderStatusHistoryModels = new ArrayList<>();
-                    orderStatusHistoryModels.add(new OrderStatusHistoryModel(1L,null, null,
+                    List<OrderProcessHistoryModel> orderProcessHistoryModels = new ArrayList<>();
+                    orderProcessHistoryModels.add(new OrderProcessHistoryModel(1L, null, null,
                             "Pending", "Your Order is Pending - System", "Status Pending"));
 
                     OrderModel orderModel = OrderModel.builder()
@@ -76,7 +79,7 @@ public class ShopOrderService {
                             .paymentMethod(orderPlaceRequest.getPaymentMethod())
                             .paymentStatus("Unpaid")
                             .shippingCharge(shippingTotal)
-                            .orderProcessHistory(orderStatusHistoryModels)
+                            .orderProcessHistory(orderProcessHistoryModels)
                             .build();
 
                     Integer subTotal;
@@ -117,13 +120,49 @@ public class ShopOrderService {
         Sort sort = Sort.by("createdOn").descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
-        Page<OrderModel> orderModelsPageable = orderRepository. findByUserName(username, pageable);
+        Page<OrderModel> orderModelsPageable = orderRepository.findByUserName(username, pageable);
 
-//        List<ShopProductResponse> shopProductResponseList =
-//                shopProductHelperService.shopProductResponseFromProductsDb(orderModelsPageable.getContent())
+        List<ShopOrderResponse> shopOrderResponses = new ArrayList<>();
+
+        for (OrderModel orderModel : orderModelsPageable.getContent()) {
+            List<OrderProductModel> orderProductModels = orderModel.getOrderItems();
+            List<ProductModel> productModels = new ArrayList<>();
+
+            for (OrderProductModel orderProductModel : orderProductModels) {
+                List<ProductVariantModel> productVariantModels = new ArrayList<>();
+                ProductVariantModel productVariantModel = orderProductModel.getProductVariant();
+                productVariantModel.setQuantity(orderProductModel.getQuantity());
+                productVariantModels.add(productVariantModel);
+
+                ProductModel productModel = orderProductModel.getProduct();
+                productModel.setVariants(productVariantModels);
+
+                productModels.add(productModel);
+            }
+            List<ShopProductResponse> shopProductResponseList =
+                    new ArrayList<>(shopProductHelperService.shopProductResponseFromProductsDb(productModels));
+
+            List<ShopOrderProcessHistory> shopOrderProcessHistories =
+                    shopOrderServiceExtended.orderProcessHistoryForShop(orderModel);
+
+            ShopOrderResponse shopOrderResponse = new ShopOrderResponse(orderModel.getOrderId(), orderModel.getInvoiceId(),
+                    orderModel.getUserName(), shopProductResponseList, orderModel.getDeliveryAddress(),
+                    orderModel.getOrderStatus(), orderModel.getProductPriceTotal(), orderModel.getPaidAmount(),
+                    orderModel.getPaymentMethod(), orderModel.getPaymentStatus(), orderModel.getShippingCharge(),
+                    orderModel.getAdminDiscount(), orderModel.getAdminDiscountAddedBy(), orderModel.getCouponDiscount(),
+                    orderModel.getSubTotal(), orderModel.getTotalAmount(), orderModel.getTransactionId(),
+                    orderModel.getCouponModel(), shopOrderProcessHistories
+            );
+            shopOrderResponses.add(shopOrderResponse);
+        }
 
 
-        return new ResponseEntity(orderModelsPageable, HttpStatus.OK);
+        PaginationResponse<List<ShopOrderResponse>> paginationResponse =
+                new PaginationResponse<>(pageSize, pageNo, orderModelsPageable.getContent().size(), orderModelsPageable.isLast(),
+                        orderModelsPageable.getTotalElements(), orderModelsPageable.getTotalPages(), shopOrderResponses);
+
+        return new ResponseEntity<>(new ApiResponse<>(200, "Orders Found", paginationResponse), HttpStatus.OK);
     }
+
 
 }

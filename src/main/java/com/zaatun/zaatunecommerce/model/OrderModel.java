@@ -67,5 +67,5 @@ public class OrderModel {
     private CouponModel couponModel;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderStatusHistoryModel> orderProcessHistory;
+    private List<OrderProcessHistoryModel> orderProcessHistory;
 }
