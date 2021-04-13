@@ -2,10 +2,7 @@ package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
-import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopCategoryResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopSubCategoryResponse;
 import com.zaatun.zaatunecommerce.model.CategoryModel;
 import com.zaatun.zaatunecommerce.model.ProductModel;
 import com.zaatun.zaatunecommerce.model.SubCategoryModel;
@@ -16,21 +13,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @Service
 public class ShopProductService {
     private final ProductRepository productRepository;
-
+    private final ShopProductHelperService shopProductHelperService;
 
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>> getProducts(String productName, String brand, String categoryId, String subCategoryId,
-                                                                              String productSlug, Boolean inStock, Boolean isFeatured, String processor,
-                                                                              String battery, String ram, String rom, String screenSize, String backCamera,
-                                                                              String frontCamera, String sortBy, Sort.Direction orderBy, int pageSize,
-                                                                              int pageNo, Integer rating) {
+                                                                                                  String productSlug, Boolean inStock, Boolean isFeatured, String processor,
+                                                                                                  String battery, String ram, String rom, String screenSize, String backCamera,
+                                                                                                  String frontCamera, String sortBy, Sort.Direction orderBy, int pageSize,
+                                                                                                  int pageNo, Integer rating) {
 
         ProductModel exProduct = ProductModel.builder()
                 .productSlug(productSlug)
@@ -63,33 +58,7 @@ public class ShopProductService {
 
         List<ProductModel> productModels = productModelPage.getContent();
 
-        List<ShopProductResponse> shopProductResponses = new ArrayList<>();
-        for (ProductModel productModel : productModels) {
-
-            CategoryModel categoryModel = productModel.getCategoryModel();
-            List<ShopSubCategoryResponse> shopSubCategoryResponses = new ArrayList<>();
-            ShopCategoryResponse shopCategoryResponse = new ShopCategoryResponse(categoryModel.getCategoryName(),
-                    categoryModel.getCategoryIcon(), categoryModel.getCategorySlug(), categoryModel.getCategoryImage(),
-                    shopSubCategoryResponses);
-
-            SubCategoryModel subCategoryModel = productModel.getSubCategoryModel();
-            ShopSubCategoryResponse shopSubCategoryResponse = new ShopSubCategoryResponse(
-                    subCategoryModel.getSubCategoryName(), subCategoryModel.getSubCategoryIcon(),
-                    subCategoryModel.getSubCategorySlug(), subCategoryModel.getSubCategoryImage());
-
-            ShopProductResponse shopProductResponse = new ShopProductResponse(productModel.getProductName(),
-                    productModel.getProductSlug(), productModel.getSKU(), productModel.getBrand(), shopCategoryResponse,
-                    shopSubCategoryResponse, productModel.getRegularPrice(), productModel.getDiscountPrice(),
-                    productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
-                    productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
-                    productModel.getIsAvailable(), productModel.getVideoUrl(), productModel.getAffiliatePercentage(),
-                    productModel.getVat(), productModel.getProductImages(), productModel.getVariants(),
-                    productModel.getProductReviews(), productModel.getProcessor(), productModel.getBattery(),
-                    productModel.getRam(), productModel.getRom(), productModel.getScreenSize(),
-                    productModel.getBackCamera(), productModel.getFrontCamera());
-
-            shopProductResponses.add(shopProductResponse);
-        }
+        List<ShopProductResponse> shopProductResponses = shopProductHelperService.shopProductResponseFromProductsDb(productModels);
 
         PaginationResponse<List<ShopProductResponse>> paginationResponse = new PaginationResponse<>(pageSize, pageNo,
                 shopProductResponses.size(), productModelPage.isLast(), productModelPage.getTotalElements(),
@@ -101,6 +70,7 @@ public class ShopProductService {
             return new ResponseEntity<>(new ApiResponse<>(200, "Product Found", paginationResponse), HttpStatus.OK);
         }
     }
+
 
 }
 

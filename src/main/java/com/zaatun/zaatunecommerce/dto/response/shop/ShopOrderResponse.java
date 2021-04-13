@@ -1,43 +1,32 @@
-package com.zaatun.zaatunecommerce.model;
+package com.zaatun.zaatunecommerce.dto.response.shop;
 
-import lombok.*;
+import com.zaatun.zaatunecommerce.model.CouponModel;
+import com.zaatun.zaatunecommerce.model.DeliveryAddressModel;
+import com.zaatun.zaatunecommerce.model.OrderProductModel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.util.List;
 
-@Data
-@Builder
-//@Getter
-//@Setter
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "order_model")
-public class OrderModel {
-    @Id
-    private String id;
-
+public class ShopOrderResponse {
     private String orderId;
 
     private String invoiceId;
 
-    private String createBy;
-
-    private Long createdOn;
-
-    private String updatedBy;
-
-    private Long updatedOn;
-
     private String userName;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderProductModel> orderItems;
+    private List<ShopProductResponse> orderItems;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private DeliveryAddressModel deliveryAddress;
-
-
 
     private String orderStatus;
 
@@ -65,7 +54,4 @@ public class OrderModel {
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private CouponModel couponModel;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderStatusHistoryModel> orderProcessHistory;
 }

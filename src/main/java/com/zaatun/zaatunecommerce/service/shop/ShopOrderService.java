@@ -3,6 +3,7 @@ package com.zaatun.zaatunecommerce.service.shop;
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderPlaceRequest;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.*;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,7 @@ public class ShopOrderService {
     private final ProfileRepository profileRepository;
     private final UtilService utilService;
     private final ShopOrderServiceExtended shopOrderServiceExtended;
+    private final ShopProductHelperService shopProductHelperService;
 
     public ResponseEntity<ApiResponse<String>> placeOrder(OrderPlaceRequest orderPlaceRequest, String token) {
         BasicTableInfo basicTableInfo = utilService.generateBasicTableInfo("", token);
@@ -56,6 +59,9 @@ public class ShopOrderService {
 
                     List<OrderProductModel> orderProductModelList =
                             shopOrderServiceExtended.fromProductIdListToProductList(orderPlaceRequest.getProducts(), token);
+                    List<OrderStatusHistoryModel> orderStatusHistoryModels = new ArrayList<>();
+                    orderStatusHistoryModels.add(new OrderStatusHistoryModel(1L,null, null,
+                            "Pending", "Your Order is Pending - System", "Status Pending"));
 
                     OrderModel orderModel = OrderModel.builder()
                             .id(basicTableInfo.getId())
@@ -70,6 +76,7 @@ public class ShopOrderService {
                             .paymentMethod(orderPlaceRequest.getPaymentMethod())
                             .paymentStatus("Unpaid")
                             .shippingCharge(shippingTotal)
+                            .orderProcessHistory(orderStatusHistoryModels)
                             .build();
 
                     Integer subTotal;
@@ -111,6 +118,10 @@ public class ShopOrderService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         Page<OrderModel> orderModelsPageable = orderRepository. findByUserName(username, pageable);
+
+//        List<ShopProductResponse> shopProductResponseList =
+//                shopProductHelperService.shopProductResponseFromProductsDb(orderModelsPageable.getContent())
+
 
         return new ResponseEntity(orderModelsPageable, HttpStatus.OK);
     }
