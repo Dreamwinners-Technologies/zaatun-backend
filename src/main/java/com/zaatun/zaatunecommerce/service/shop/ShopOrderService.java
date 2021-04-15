@@ -79,6 +79,7 @@ public class ShopOrderService {
                             .paymentMethod(orderPlaceRequest.getPaymentMethod())
                             .paymentStatus("Unpaid")
                             .shippingCharge(shippingTotal)
+                            .isCompleted(false)
                             .orderProcessHistory(orderProcessHistoryModels)
                             .build();
 
@@ -114,7 +115,7 @@ public class ShopOrderService {
 
     }
 
-    public ResponseEntity getOrderInfos(String token, Integer pageNo, Integer pageSize) {
+    public ResponseEntity<ApiResponse<PaginationResponse<List<ShopOrderResponse>>>> getOrderInfos(String token, Integer pageNo, Integer pageSize) {
         String username = jwtProvider.getUserNameFromJwt(token);
 
         Sort sort = Sort.by("createdOn").descending();

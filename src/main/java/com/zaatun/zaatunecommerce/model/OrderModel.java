@@ -68,4 +68,8 @@ public class OrderModel {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<OrderProcessHistoryModel> orderProcessHistory;
+
+    private Boolean isCompleted;
+
+
 }
