@@ -1,11 +1,10 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderProductRequest;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistory;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistoryResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.*;
-import com.zaatun.zaatunecommerce.service.UtilService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -170,6 +169,7 @@ public class ShopOrderServiceExtended {
                 orderProductModel.setQuantity(orderProductRequest.getQuantity());
 
                 orderProductModelList.add(orderProductModel);
+
                 productRepository.save(productModel);
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -189,14 +189,14 @@ public class ShopOrderServiceExtended {
     }
 
 
-    List<ShopOrderProcessHistory> orderProcessHistoryForShop(OrderModel orderModel) {
-        List<ShopOrderProcessHistory> shopOrderProcessHistories = new ArrayList<>();
+    List<ShopOrderProcessHistoryResponse> orderProcessHistoryForShop(OrderModel orderModel) {
+        List<ShopOrderProcessHistoryResponse> shopOrderProcessHistories = new ArrayList<>();
         for (OrderProcessHistoryModel orderProcessHistory: orderModel.getOrderProcessHistory()){
-            ShopOrderProcessHistory shopOrderProcessHistory =
-                    new ShopOrderProcessHistory(orderProcessHistory.getUpdateBy(), orderProcessHistory.getUpdatedOn(),
+            ShopOrderProcessHistoryResponse shopOrderProcessHistoryResponse =
+                    new ShopOrderProcessHistoryResponse(orderProcessHistory.getUpdateBy(), orderProcessHistory.getUpdatedOn(),
                             orderProcessHistory.getOrderStatus(), orderProcessHistory.getCustomerNote());
 
-            shopOrderProcessHistories.add(shopOrderProcessHistory);
+            shopOrderProcessHistories.add(shopOrderProcessHistoryResponse);
         }
         return shopOrderProcessHistories;
     }

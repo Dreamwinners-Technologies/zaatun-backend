@@ -37,8 +37,6 @@ public class OrderModel {
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private DeliveryAddressModel deliveryAddress;
 
-
-
     private String orderStatus;
 
     private Integer productPriceTotal;
@@ -70,6 +68,5 @@ public class OrderModel {
     private List<OrderProcessHistoryModel> orderProcessHistory;
 
     private Boolean isCompleted;
-
 
 }

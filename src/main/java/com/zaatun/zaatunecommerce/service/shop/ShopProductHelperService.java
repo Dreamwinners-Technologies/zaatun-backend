@@ -1,10 +1,9 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopCategoryResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopSubCategoryResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.*;
 import com.zaatun.zaatunecommerce.model.CategoryModel;
 import com.zaatun.zaatunecommerce.model.ProductModel;
+import com.zaatun.zaatunecommerce.model.ProductVariantModel;
 import com.zaatun.zaatunecommerce.model.SubCategoryModel;
 import com.zaatun.zaatunecommerce.repository.ProductRepository;
 import lombok.AllArgsConstructor;
@@ -47,5 +46,24 @@ public class ShopProductHelperService {
             shopProductResponses.add(shopProductResponse);
         }
         return shopProductResponses;
+    }
+
+    public List<ShopOrderProductResponse> shopOrderProductResponseFromProducts(List<ProductModel> productModels) {
+        List<ShopOrderProductResponse> shopOrderProductResponses = new ArrayList<>();
+        for (ProductModel productModel : productModels) {
+
+            ProductVariantModel productVariantModel = productModel.getVariants().get(0);
+            ShopOrderVariantResponse shopOrderVariantResponse =
+                    new ShopOrderVariantResponse(productVariantModel.getVariant(), productVariantModel.getQuantity());
+
+            ShopOrderProductResponse shopOrderProductResponse = new ShopOrderProductResponse(productModel.getProductName(),
+                    productModel.getProductSlug(), productModel.getSKU(), productModel.getBrand(),
+                    productModel.getCategoryModel().getCategoryName() , productModel.getSubCategoryModel().getSubCategoryName(),
+                    productModel.getRegularPrice(), productModel.getDiscountPrice(), productModel.getWarranty(),
+                    productModel.getEmi(), productModel.getVat(), productModel.getProductImages(), shopOrderVariantResponse);
+
+            shopOrderProductResponses.add(shopOrderProductResponse);
+        }
+        return shopOrderProductResponses;
     }
 }

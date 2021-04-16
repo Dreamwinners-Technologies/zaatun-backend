@@ -49,7 +49,7 @@ public class SpringFoxConfig {
         ApiInfo apiInfo = new ApiInfo(
                 "Zaatun-E-Commerce Spring Boot REST API",
                 "Spring Boot REST API for Zaatun-E-Commerce",
-                "B-0.5",
+                "B-0.6",
                 "Terms of service",
                 "Abdullah AL Habib",
                 "Apache License Version 2.0",

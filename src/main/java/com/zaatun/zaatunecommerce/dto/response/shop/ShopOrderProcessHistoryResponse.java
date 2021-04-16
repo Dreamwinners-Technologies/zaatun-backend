@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ShopOrderProcessHistory {
+public class ShopOrderProcessHistoryResponse {
     private String updateBy;
 
     private Long updatedOn;

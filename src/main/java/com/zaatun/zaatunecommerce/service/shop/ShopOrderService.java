@@ -4,9 +4,9 @@ import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderPlaceRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistory;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistoryResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProductResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.*;
@@ -53,6 +53,7 @@ public class ShopOrderService {
 
                 if (profileModel.getDeliveryAddresses().contains(deliveryAddressModel)) {
                     Integer shippingTotal = shopOrderServiceExtended.calculateShippingCharge(deliveryAddressModel);
+                    String username = jwtProvider.getUserNameFromJwt(token);
                     Integer adminDiscount = 0;
 
                     Integer productPriceTotal = shopOrderServiceExtended.calculateTotalProductPrice(orderPlaceRequest.getProducts());
@@ -62,16 +63,23 @@ public class ShopOrderService {
 
                     List<OrderProductModel> orderProductModelList =
                             shopOrderServiceExtended.fromProductIdListToProductList(orderPlaceRequest.getProducts(), token);
+
                     List<OrderProcessHistoryModel> orderProcessHistoryModels = new ArrayList<>();
-                    orderProcessHistoryModels.add(new OrderProcessHistoryModel(1L, null, null,
-                            "Pending", "Your Order is Pending - System", "Status Pending"));
+                    OrderProcessHistoryModel orderProcessHistoryModel = OrderProcessHistoryModel.builder()
+                            .updateBy("System - User")
+                            .updatedOn(basicTableInfo.getCreationTime())
+                            .orderStatus("Pending")
+                            .employeeNote("Order Placed by: "+ username)
+                            .customerNote("Your order is in pending phase")
+                            .build();
+                    orderProcessHistoryModels.add(orderProcessHistoryModel);
 
                     OrderModel orderModel = OrderModel.builder()
                             .id(basicTableInfo.getId())
                             .orderId(orderId)
                             .createBy(basicTableInfo.getCreateBy())
                             .createdOn(basicTableInfo.getCreationTime())
-                            .userName(jwtProvider.getUserNameFromJwt(token))
+                            .userName(username)
                             .orderItems(orderProductModelList)
                             .orderStatus("Pending")
                             .deliveryAddress(deliveryAddressModel)
@@ -140,19 +148,18 @@ public class ShopOrderService {
 
                 productModels.add(productModel);
             }
-            List<ShopProductResponse> shopProductResponseList =
-                    new ArrayList<>(shopProductHelperService.shopProductResponseFromProductsDb(productModels));
+            List<ShopOrderProductResponse> shopProductResponseList =
+                    new ArrayList<>(shopProductHelperService.shopOrderProductResponseFromProducts(productModels));
 
-            List<ShopOrderProcessHistory> shopOrderProcessHistories =
+            List<ShopOrderProcessHistoryResponse> shopOrderProcessHistories =
                     shopOrderServiceExtended.orderProcessHistoryForShop(orderModel);
 
             ShopOrderResponse shopOrderResponse = new ShopOrderResponse(orderModel.getOrderId(), orderModel.getInvoiceId(),
                     orderModel.getUserName(), shopProductResponseList, orderModel.getDeliveryAddress(),
                     orderModel.getOrderStatus(), orderModel.getProductPriceTotal(), orderModel.getPaidAmount(),
                     orderModel.getPaymentMethod(), orderModel.getPaymentStatus(), orderModel.getShippingCharge(),
-                    orderModel.getAdminDiscount(), orderModel.getAdminDiscountAddedBy(), orderModel.getCouponDiscount(),
-                    orderModel.getSubTotal(), orderModel.getTotalAmount(), orderModel.getTransactionId(),
-                    orderModel.getCouponModel(), shopOrderProcessHistories
+                    orderModel.getAdminDiscount(), orderModel.getCouponDiscount(), orderModel.getSubTotal(),
+                    orderModel.getTotalAmount(), orderModel.getTransactionId(), shopOrderProcessHistories
             );
             shopOrderResponses.add(shopOrderResponse);
         }
@@ -162,7 +169,12 @@ public class ShopOrderService {
                 new PaginationResponse<>(pageSize, pageNo, orderModelsPageable.getContent().size(), orderModelsPageable.isLast(),
                         orderModelsPageable.getTotalElements(), orderModelsPageable.getTotalPages(), shopOrderResponses);
 
-        return new ResponseEntity<>(new ApiResponse<>(200, "Orders Found", paginationResponse), HttpStatus.OK);
+        if(orderModelsPageable.isEmpty()){
+            return new ResponseEntity<>(new ApiResponse<>(200, "No Orders Found", paginationResponse), HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(new ApiResponse<>(200, "Orders Found", paginationResponse), HttpStatus.OK);
+        }
     }
 
 
