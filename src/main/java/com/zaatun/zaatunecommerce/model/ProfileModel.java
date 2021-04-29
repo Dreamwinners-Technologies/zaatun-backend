@@ -58,4 +58,8 @@ public class ProfileModel {
     private Integer totalOrders;
 
     private Integer totalOrderAmounts;
+
+    private Boolean isAffiliate;
+
+
 }

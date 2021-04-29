@@ -2,9 +2,12 @@ package com.zaatun.zaatunecommerce.model;
 
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 
@@ -40,16 +43,20 @@ public class ProductModel {
     @NotBlank
     private String brand;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    @ManyToOne(cascade = CascadeType.ALL)
     private CategoryModel categoryModel;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    @ManyToOne(cascade = CascadeType.ALL)
     private SubCategoryModel subCategoryModel;
 
+    @Column(nullable = false)
     private Integer buyingPrice;
 
+    @Min(1)
+    @Column(nullable = false)
     private Integer regularPrice;
 
+    @Column(nullable = false)
     private Integer discountPrice;
 
     @Column(columnDefinition="TEXT")
@@ -58,6 +65,7 @@ public class ProductModel {
     @Column(columnDefinition="TEXT")
     private String shortDescription;
 
+    @Column(columnDefinition="TEXT")
     private String warranty;
 
     private String emi;
@@ -66,7 +74,7 @@ public class ProductModel {
 
     private Boolean isFeatured;
 
-    private Boolean isAvailable;
+    private Boolean isDiscount;
 
     private String videoUrl;
 
@@ -76,12 +84,15 @@ public class ProductModel {
 
     private Long totalSold;
 
-    @CollectionTable
-    @ElementCollection
-    private List<String> productImages;
+    private Integer quantity;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<ProductVariantModel> variants;
+    private String deliveryInfo;
+
+    private String key;
+
+    private String value;
+
+    private Double rating;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<ProductReviewModel> productReviews;
@@ -90,18 +101,10 @@ public class ProductModel {
     @ElementCollection
     private Set<String> buyersId;
 
-    private String processor;
+    @OneToOne(cascade = CascadeType.ALL)
+    private SpecificationModel specification;
 
-    private String battery;
-
-    private String ram;
-
-    private String rom;
-
-    private String screenSize;
-
-    private String backCamera;
-
-    private String frontCamera;
-
+    @CollectionTable
+    @ElementCollection
+    private List<String> productImages;
 }

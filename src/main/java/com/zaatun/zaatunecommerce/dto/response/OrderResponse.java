@@ -36,7 +36,7 @@ public class OrderResponse {
 
     private String userName;
 
-    private List<ShopOrderProductResponse> orderItems;
+    private List<OrderProductModel> orderItems;
 
     private DeliveryAddressModel deliveryAddress;
 

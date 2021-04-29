@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
+import javax.persistence.Column;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -25,10 +27,16 @@ public class ProductEditRequest {
 
     private String subCategoryId;
 
+    @Min(0)
+    @Column(nullable = false)
     private Integer buyingPrice;
 
+    @Min(1)
+    @Column(nullable = false)
     private Integer regularPrice;
 
+    @Min(0)
+    @Column(nullable = false)
     private Integer discountPrice;
 
     private String description;
@@ -43,7 +51,7 @@ public class ProductEditRequest {
 
     private Boolean isFeatured;
 
-    private Boolean isAvailable;
+    private Boolean isDiscount;
 
     private String videoUrl;
 
@@ -51,19 +59,9 @@ public class ProductEditRequest {
 
     private Double vat;
 
-    private List<ProductQuantityRequest> variants;
+    private Integer quantity;
 
-    private String processor;
+    private String deliveryInfo;
 
-    private String battery;
-
-    private String ram;
-
-    private String rom;
-
-    private String screenSize;
-
-    private String backCamera;
-
-    private String frontCamera;
+    private AddSpecificationRequest addSpecification;
 }

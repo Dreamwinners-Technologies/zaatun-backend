@@ -3,6 +3,8 @@ package com.zaatun.zaatunecommerce.dto.request;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
+import javax.persistence.Column;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -26,10 +28,16 @@ public class AddProductRequest {
 
     private String subCategoryId;
 
+    @Min(0)
+    @Column(nullable = false)
     private Integer buyingPrice;
 
+    @Min(1)
+    @Column(nullable = false)
     private Integer regularPrice;
 
+    @Min(0)
+    @Column(nullable = false)
     private Integer discountPrice;
 
     private String description;
@@ -44,7 +52,7 @@ public class AddProductRequest {
 
     private Boolean isFeatured;
 
-    private Boolean isAvailable;
+    private Boolean isDiscount;
 
     private String videoUrl;
 
@@ -52,19 +60,14 @@ public class AddProductRequest {
 
     private Double vat;
 
-    private List<ProductQuantityRequest> variants;
+    private Integer quantity;
 
-    private String processor;
+    private String deliveryInfo;
 
-    private String battery;
+    private String key;
 
-    private String ram;
+    private String value;
 
-    private String rom;
+    private AddSpecificationRequest addSpecification;
 
-    private String screenSize;
-
-    private String backCamera;
-
-    private String frontCamera;
 }

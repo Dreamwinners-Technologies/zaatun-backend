@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,11 +19,31 @@ public class OrderProductModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-    private ProductModel product;
+    private String productName;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-    private ProductVariantModel productVariant;
+    private String productSlug;
+
+    private String SKU;
+
+    private String brand;
+
+    private String categoryName;
+
+    private String subCategoryName;
+
+    private Integer regularPrice;
+
+    private Integer discountPrice;
+
+    private String shortDescription;
+
+    private Double vat;
+
+    private String deliveryInfo;
+
+    @CollectionTable
+    @ElementCollection
+    private List<String> productImages;
 
     private Integer quantity;
 

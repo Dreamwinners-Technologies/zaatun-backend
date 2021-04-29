@@ -34,7 +34,7 @@ public class OrderModel {
     @OneToMany(cascade = CascadeType.ALL)
     private List<OrderProductModel> orderItems;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    @OneToOne(cascade = CascadeType.ALL)
     private DeliveryAddressModel deliveryAddress;
 
     private String orderStatus;
@@ -53,13 +53,13 @@ public class OrderModel {
 
     private String adminDiscountAddedBy;
 
-    private Integer couponDiscount;
-
     private Integer subTotal;
 
     private Integer totalAmount;
 
     private String transactionId;
+
+    private Integer couponDiscount;
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private CouponModel couponModel;
@@ -68,5 +68,7 @@ public class OrderModel {
     private List<OrderProcessHistoryModel> orderProcessHistory;
 
     private Boolean isCompleted;
+
+    private String orderComment;
 
 }

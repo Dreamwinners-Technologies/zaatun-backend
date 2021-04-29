@@ -3,6 +3,7 @@ package com.zaatun.zaatunecommerce.service.shop;
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderPlaceRequest;
+import com.zaatun.zaatunecommerce.dto.request.shop.OrderProductRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistoryResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProductResponse;
@@ -30,50 +31,88 @@ import java.util.Optional;
 public class ShopOrderService {
     private final JwtProvider jwtProvider;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
     private final ProfileRepository profileRepository;
     private final UtilService utilService;
     private final ShopOrderServiceExtended shopOrderServiceExtended;
-    private final ShopProductHelperService shopProductHelperService;
 
+    //Order Place Request
     public ResponseEntity<ApiResponse<String>> placeOrder(OrderPlaceRequest orderPlaceRequest, String token) {
+        //Getting UserName from JWT Token
+        String username = jwtProvider.getUserNameFromJwt(token);
+
+        //Generate BasicTable Infos like: Id, Slug, created by, created on, SKU based on JWT Token
         BasicTableInfo basicTableInfo = utilService.generateBasicTableInfo("", token);
+
+        //Setting up Unique and Meaningful Order ID
+        //Get first 8 digit of UUID from basic table, then take last 4 values from current times
         String orderId = "ZTN-O-" + basicTableInfo.getId().substring(0, 8).toUpperCase() + "-" +
                 java.time.LocalTime.now().toString().substring(9, 12);
 
+        //Getting User Profile from Database using username
+        Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(username);
 
-        Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(jwtProvider.getUserNameFromJwt(token));
+        //Checking if there is a profile with this userName
         if (profileModelOptional.isPresent()) {
             ProfileModel profileModel = profileModelOptional.get();
 
+            //Getting Delivery Address using address ID from Database
             Optional<DeliveryAddressModel> deliveryAddressModelOptional =
                     shopOrderServiceExtended.getDeliveryAddress(profileModel, orderPlaceRequest.getDeliveryAddressId());
 
+            //If deliveryAddress found then go to this section
             if (deliveryAddressModelOptional.isPresent()) {
                 DeliveryAddressModel deliveryAddressModel = deliveryAddressModelOptional.get();
 
+                //Check if the buyers profile has the deliveryAddress
                 if (profileModel.getDeliveryAddresses().contains(deliveryAddressModel)) {
-                    Integer shippingTotal = shopOrderServiceExtended.calculateShippingCharge(deliveryAddressModel);
-                    String username = jwtProvider.getUserNameFromJwt(token);
+
+                    //Setting admin discount to 0
                     Integer adminDiscount = 0;
 
-                    Integer productPriceTotal = shopOrderServiceExtended.calculateTotalProductPrice(orderPlaceRequest.getProducts());
+                    //Separate all the product slugs from orderList and
+                    List<String> slugs = new ArrayList<>();
+                    for (OrderProductRequest orderProductRequest : orderPlaceRequest.getProducts()) {
+                        slugs.add(orderProductRequest.getProductSlug());
+                    }
 
-                    Optional<CouponModel> couponModelOptional =
-                            shopOrderServiceExtended.calculateCouponDiscount(orderPlaceRequest.getCouponCode(), productPriceTotal);
+                    //Get Product Info List from the database using product slugs from order information
+                    List<ProductModel> productModels = productRepository.findByProductSlugIn(slugs);
 
+                    //Check if
+                    if (productModels.size() != orderPlaceRequest.getProducts().size()) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All Products are not found on Database");
+                    }
+
+                    //Get the total price of products
+                    Integer totalProductPrice = shopOrderServiceExtended.getTotalProductPrice(productModels, orderPlaceRequest.getProducts());
+                    CouponModel couponModel = null;
+                    Integer couponDiscount = 0;
+
+                    //Check if coupon is valid then return the coupon discount amount
+                    if (!orderPlaceRequest.getCouponCode().isEmpty()) {
+                        couponModel = shopOrderServiceExtended.getCouponDiscount(totalProductPrice, orderPlaceRequest.getCouponCode());
+                        couponDiscount = couponModel.getCouponAmount();
+                    }
+
+                    //Migrate ProductModel to OrderProductModel and reduce product stock
                     List<OrderProductModel> orderProductModelList =
-                            shopOrderServiceExtended.fromProductIdListToProductList(orderPlaceRequest.getProducts(), token);
+                            shopOrderServiceExtended.fromProductsToOrderProducts(productModels, orderPlaceRequest.getProducts(), username);
 
-                    List<OrderProcessHistoryModel> orderProcessHistoryModels = new ArrayList<>();
-                    OrderProcessHistoryModel orderProcessHistoryModel = OrderProcessHistoryModel.builder()
-                            .updateBy("System - User")
-                            .updatedOn(basicTableInfo.getCreationTime())
-                            .orderStatus("Pending")
-                            .employeeNote("Order Placed by: "+ username)
-                            .customerNote("Your order is in pending phase")
-                            .build();
-                    orderProcessHistoryModels.add(orderProcessHistoryModel);
+                    //Adding initial product status
+                    List<OrderProcessHistoryModel> orderProcessHistoryModels =
+                            getOrderProcessHistoryModels(username, basicTableInfo);
 
+                    //Saving new Delivery address
+                    DeliveryAddressModel deliveryAddress = buildNewDeliveryAddress(deliveryAddressModel);
+
+                    //Getting shipping charge
+                    Integer shippingCharge = shopOrderServiceExtended.calculateShippingCharge(deliveryAddress);
+
+                    //Calculating total amount
+                    Integer totalAmount = shopOrderServiceExtended.calculateTotal(totalProductPrice, adminDiscount, couponDiscount, shippingCharge);
+
+                    //Setting all order data to OrderModel
                     OrderModel orderModel = OrderModel.builder()
                             .id(basicTableInfo.getId())
                             .orderId(orderId)
@@ -81,32 +120,29 @@ public class ShopOrderService {
                             .createdOn(basicTableInfo.getCreationTime())
                             .userName(username)
                             .orderItems(orderProductModelList)
+                            .deliveryAddress(deliveryAddress)
                             .orderStatus("Pending")
-                            .deliveryAddress(deliveryAddressModel)
-                            .productPriceTotal(productPriceTotal)
+                            .productPriceTotal(totalProductPrice)
+                            .paidAmount(0)
                             .paymentMethod(orderPlaceRequest.getPaymentMethod())
                             .paymentStatus("Unpaid")
-                            .shippingCharge(shippingTotal)
-                            .isCompleted(false)
+                            .shippingCharge(shippingCharge)
+                            .couponDiscount(couponDiscount)
+                            .adminDiscount(adminDiscount)
+                            .subTotal(totalProductPrice)
+                            .totalAmount(totalAmount)
+                            .couponModel(couponModel)
                             .orderProcessHistory(orderProcessHistoryModels)
+                            .isCompleted(false)
+                            .orderComment(orderPlaceRequest.getOrderComment())
                             .build();
 
-                    Integer subTotal;
-                    if (couponModelOptional.isPresent()) {
-                        CouponModel couponModel = couponModelOptional.get();
-                        subTotal = shopOrderServiceExtended.calculateTotal(productPriceTotal, adminDiscount, couponModel.getCouponAmount());
-                        orderModel.setCouponModel(couponModel);
-                        orderModel.setCouponDiscount(couponModel.getCouponAmount());
-                    } else {
-                        subTotal = shopOrderServiceExtended.calculateTotal(productPriceTotal, adminDiscount, 0);
-                    }
 
-                    orderModel.setSubTotal(subTotal);
-                    orderModel.setTotalAmount(subTotal + shippingTotal);
+                    profileModel.setTotalOrders(profileModel.getTotalOrders() + 1);     //Increase total order of user
+                    profileModel.setTotalOrderAmounts(profileModel.getTotalOrderAmounts() + totalAmount);       //Increase total amount of user
+
                     orderRepository.save(orderModel);
-
-                    profileModel.setTotalOrders(profileModel.getTotalOrders() + 1);
-                    profileModel.setTotalOrderAmounts(profileModel.getTotalOrderAmounts() + subTotal + shippingTotal);
+                    productRepository.saveAll(productModels);
                     profileRepository.save(profileModel);
 
                     return new ResponseEntity<>(new ApiResponse<>(201, "Order Placed Successful", orderId), HttpStatus.CREATED);
@@ -120,7 +156,31 @@ public class ShopOrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile Not Found");
         }
 
+    }
 
+    private List<OrderProcessHistoryModel> getOrderProcessHistoryModels(String username, BasicTableInfo basicTableInfo) {
+        List<OrderProcessHistoryModel> orderProcessHistoryModels = new ArrayList<>();
+        OrderProcessHistoryModel orderProcessHistoryModel = OrderProcessHistoryModel.builder()
+                .updateBy("System - User")
+                .updatedOn(basicTableInfo.getCreationTime())
+                .orderStatus("PENDING")
+                .employeeNote("Order Placed by: " + username)
+                .customerNote("Your order is in pending phase")
+                .build();
+        orderProcessHistoryModels.add(orderProcessHistoryModel);
+        return orderProcessHistoryModels;
+    }
+
+    private DeliveryAddressModel buildNewDeliveryAddress(DeliveryAddressModel deliveryAddressModel) {
+        DeliveryAddressModel deliveryAddress = new DeliveryAddressModel();
+        deliveryAddress.setFullName(deliveryAddressModel.getFullName());
+        deliveryAddress.setAddress(deliveryAddressModel.getAddress());
+        deliveryAddress.setPhoneNo(deliveryAddressModel.getPhoneNo());
+        deliveryAddress.setArea(deliveryAddressModel.getArea());
+        deliveryAddress.setCity(deliveryAddressModel.getCity());
+        deliveryAddress.setRegion(deliveryAddress.getRegion());
+
+        return deliveryAddress;
     }
 
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopOrderResponse>>>> getOrderInfos(String token, Integer pageNo, Integer pageSize) {
@@ -135,27 +195,28 @@ public class ShopOrderService {
 
         for (OrderModel orderModel : orderModelsPageable.getContent()) {
             List<OrderProductModel> orderProductModels = orderModel.getOrderItems();
-            List<ProductModel> productModels = new ArrayList<>();
+
+            List<ShopOrderProductResponse> shopOrderProductResponses = new ArrayList<>();
 
             for (OrderProductModel orderProductModel : orderProductModels) {
-                List<ProductVariantModel> productVariantModels = new ArrayList<>();
-                ProductVariantModel productVariantModel = orderProductModel.getProductVariant();
-                productVariantModel.setQuantity(orderProductModel.getQuantity());
-                productVariantModels.add(productVariantModel);
+                ShopOrderProductResponse productResponse = new ShopOrderProductResponse(orderProductModel.getProductName(),
+                        orderProductModel.getProductSlug(), orderProductModel.getSKU(), orderProductModel.getBrand(),
+                        orderProductModel.getCategoryName(), orderProductModel.getSubCategoryName(),
+                        orderProductModel.getRegularPrice(), orderProductModel.getDiscountPrice(),
+                        orderProductModel.getShortDescription(), orderProductModel.getVat(), orderProductModel.getDeliveryInfo(),
+                        orderProductModel.getProductImages(), orderProductModel.getQuantity());
 
-                ProductModel productModel = orderProductModel.getProduct();
-                productModel.setVariants(productVariantModels);
-
-                productModels.add(productModel);
+                shopOrderProductResponses.add(productResponse);
             }
-            List<ShopOrderProductResponse> shopProductResponseList =
-                    new ArrayList<>(shopProductHelperService.shopOrderProductResponseFromProducts(productModels));
+
+//            List<ShopOrderProductResponse> shopProductResponseList =
+//                    new ArrayList<>(shopProductHelperService.shopOrderProductResponseFromProducts(productModels));
 
             List<ShopOrderProcessHistoryResponse> shopOrderProcessHistories =
                     shopOrderServiceExtended.orderProcessHistoryForShop(orderModel);
 
             ShopOrderResponse shopOrderResponse = new ShopOrderResponse(orderModel.getOrderId(), orderModel.getInvoiceId(),
-                    orderModel.getUserName(), shopProductResponseList, orderModel.getDeliveryAddress(),
+                    orderModel.getUserName(), shopOrderProductResponses, orderModel.getDeliveryAddress(),
                     orderModel.getOrderStatus(), orderModel.getProductPriceTotal(), orderModel.getPaidAmount(),
                     orderModel.getPaymentMethod(), orderModel.getPaymentStatus(), orderModel.getShippingCharge(),
                     orderModel.getAdminDiscount(), orderModel.getCouponDiscount(), orderModel.getSubTotal(),
@@ -169,10 +230,9 @@ public class ShopOrderService {
                 new PaginationResponse<>(pageSize, pageNo, orderModelsPageable.getContent().size(), orderModelsPageable.isLast(),
                         orderModelsPageable.getTotalElements(), orderModelsPageable.getTotalPages(), shopOrderResponses);
 
-        if(orderModelsPageable.isEmpty()){
+        if (orderModelsPageable.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse<>(200, "No Orders Found", paginationResponse), HttpStatus.OK);
-        }
-        else {
+        } else {
             return new ResponseEntity<>(new ApiResponse<>(200, "Orders Found", paginationResponse), HttpStatus.OK);
         }
     }

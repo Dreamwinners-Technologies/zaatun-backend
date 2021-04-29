@@ -2,17 +2,15 @@ package com.zaatun.zaatunecommerce.service;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
+import com.zaatun.zaatunecommerce.dto.request.AddDynamicSpecificationRequest;
 import com.zaatun.zaatunecommerce.dto.request.AddProductRequest;
+import com.zaatun.zaatunecommerce.dto.request.AddSpecificationRequest;
 import com.zaatun.zaatunecommerce.dto.request.ProductEditRequest;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
-import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
-import com.zaatun.zaatunecommerce.model.CategoryModel;
-import com.zaatun.zaatunecommerce.model.ProductModel;
-import com.zaatun.zaatunecommerce.model.SubCategoryModel;
+import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.CategoryRepository;
 import com.zaatun.zaatunecommerce.repository.ProductRepository;
 import com.zaatun.zaatunecommerce.repository.SubCategoryRepository;
-import io.jsonwebtoken.JwtParser;
 import lombok.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -25,7 +23,6 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -43,6 +40,29 @@ public class ProductService {
         Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(addProductRequest.getSubCategoryId());
 
         if (categoryModelOptional.isPresent() && subCategoryModelOptional.isPresent()) {
+
+            AddSpecificationRequest addSpecification = addProductRequest.getAddSpecification();
+
+            List<DynamicSpecificationModel> dynamicSpecificationModels = new ArrayList<>();
+            for (AddDynamicSpecificationRequest dynamicSpecification : addSpecification.getDynamicSpecifications()) {
+                DynamicSpecificationModel dynamicSpecificationModel = new DynamicSpecificationModel();
+                dynamicSpecificationModel.setKey(dynamicSpecification.getKey());
+                dynamicSpecificationModel.setValue(dynamicSpecification.getValue());
+
+                dynamicSpecificationModels.add(dynamicSpecificationModel);
+            }
+
+            SpecificationModel specificationModel = SpecificationModel.builder()
+                    .processor(addSpecification.getProcessor())
+                    .battery(addSpecification.getBattery())
+                    .ram(addSpecification.getRam())
+                    .rom(addSpecification.getRom())
+                    .operatingSystem(addSpecification.getOperatingSystem())
+                    .screenSize(addSpecification.getScreenSize())
+                    .backCamera(addSpecification.getBackCamera())
+                    .frontCamera(addSpecification.getFrontCamera())
+                    .dynamicSpecifications(dynamicSpecificationModels)
+                    .build();
 
             ProductModel productModel = ProductModel.builder()
                     .productId(basicTableInfo.getId())
@@ -63,20 +83,15 @@ public class ProductService {
                     .emi(addProductRequest.getEmi())
                     .inStock(addProductRequest.getInStock())
                     .isFeatured(addProductRequest.getIsFeatured())
-                    .isAvailable(addProductRequest.getIsAvailable())
+                    .isDiscount(addProductRequest.getIsDiscount())
                     .videoUrl(addProductRequest.getVideoUrl())
                     .affiliatePercentage(addProductRequest.getAffiliatePercentage())
                     .vat(addProductRequest.getVat())
-                    .variants(utilService.getQuantityModelFromQuantityList(addProductRequest.getVariants()))
-                    .processor(addProductRequest.getProcessor())
-                    .battery(addProductRequest.getBattery())
-                    .ram(addProductRequest.getRam())
-                    .rom(addProductRequest.getRom())
-                    .screenSize(addProductRequest.getScreenSize())
-                    .backCamera(addProductRequest.getBackCamera())
-                    .frontCamera(addProductRequest.getFrontCamera())
+                    .quantity(addProductRequest.getQuantity())
                     .totalSold(0L)
+                    .specification(specificationModel)
                     .build();
+
 
             productRepository.save(productModel);
 
@@ -140,11 +155,30 @@ public class ProductService {
             Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(productEditRequest.getCategoryId());
             Optional<SubCategoryModel> subCategoryModelOptional = subCategoryRepository.findById(productEditRequest.getSubCategoryId());
 
-            System.out.println(productModel.getProductId());
-            System.out.println(productModel.getProductName());
-            System.out.println(productModel.getRam());
 
             if (categoryModelOptional.isPresent() && subCategoryModelOptional.isPresent()) {
+
+                AddSpecificationRequest addSpecification = productEditRequest.getAddSpecification();
+
+                List<DynamicSpecificationModel> dynamicSpecificationModels = new ArrayList<>();
+                for (AddDynamicSpecificationRequest dynamicSpecification : addSpecification.getDynamicSpecifications()) {
+                    DynamicSpecificationModel dynamicSpecificationModel = new DynamicSpecificationModel();
+                    dynamicSpecificationModel.setKey(dynamicSpecification.getKey());
+                    dynamicSpecificationModel.setValue(dynamicSpecification.getValue());
+
+                    dynamicSpecificationModels.add(dynamicSpecificationModel);
+                }
+
+                SpecificationModel specificationModel = productModel.getSpecification();
+                specificationModel.setProcessor(addSpecification.getProcessor());
+                specificationModel.setBattery(addSpecification.getBattery());
+                specificationModel.setRam(addSpecification.getRam());
+                specificationModel.setRom(addSpecification.getRom());
+                specificationModel.setOperatingSystem(addSpecification.getOperatingSystem());
+                specificationModel.setScreenSize(addSpecification.getScreenSize());
+                specificationModel.setBackCamera(addSpecification.getBackCamera());
+                specificationModel.setFrontCamera(addSpecification.getFrontCamera());
+                specificationModel.setDynamicSpecifications(dynamicSpecificationModels);
 
                 productModel.setUpdatedBy(basicTableInfo.getCreateBy());
                 productModel.setUpdatedOn(basicTableInfo.getCreationTime());
@@ -160,27 +194,22 @@ public class ProductService {
                 productModel.setWarranty(productEditRequest.getEmi());
                 productModel.setInStock(productEditRequest.getInStock());
                 productModel.setIsFeatured(productEditRequest.getIsFeatured());
-                productModel.setIsAvailable(productEditRequest.getIsAvailable());
+                productModel.setIsDiscount(productEditRequest.getIsDiscount());
                 productModel.setVideoUrl(productEditRequest.getVideoUrl());
                 productModel.setAffiliatePercentage(productEditRequest.getAffiliatePercentage());
                 productModel.setVat(productEditRequest.getVat());
-                productModel.setVariants(utilService.getQuantityModelFromQuantityList(productEditRequest.getVariants()));
-                productModel.setProcessor(productEditRequest.getProcessor());
-                productModel.setBattery(productEditRequest.getBattery());
-                productModel.setRam(productEditRequest.getRam());
-                productModel.setRom(productEditRequest.getRom());
-                productModel.setScreenSize(productEditRequest.getScreenSize());
-                productModel.setBackCamera(productEditRequest.getBackCamera());
-                productModel.setFrontCamera(productEditRequest.getFrontCamera());
+                productModel.setQuantity(productEditRequest.getQuantity());
+                productModel.setSpecification(specificationModel);
 
                 productRepository.save(productModel);
 
                 return new ResponseEntity<>(new ApiResponse<>(201, "Product Edit Successful", productModel.getProductId()), HttpStatus.CREATED);
 
             }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product found with is id: " + productId);
 
         }
-        return null;
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Category or SubCategory is Found");
     }
 
     public ResponseEntity<ApiResponse<String>> deleteProduct(String productId) {

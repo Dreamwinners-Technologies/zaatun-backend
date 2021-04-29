@@ -1,13 +1,14 @@
 package com.zaatun.zaatunecommerce.dto.response.shop;
 
-import com.zaatun.zaatunecommerce.model.ProductVariantModel;
 import com.zaatun.zaatunecommerce.model.ProductReviewModel;
+import com.zaatun.zaatunecommerce.model.SpecificationModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -43,31 +44,20 @@ public class ShopProductResponse {
 
     private Boolean isFeatured;
 
-    private Boolean isAvailable;
+    private Boolean isDiscount;
 
     private String videoUrl;
-
-    private Double affiliatePercentage;
 
     private Double vat;
 
     private List<String> productImages;
 
-    private List<ProductVariantModel> quantity;
+    private Integer quantity;
 
     private List<ProductReviewModel> productReviews;
 
-    private String processor;
+    private Set<String> buyersId;
 
-    private String battery;
+    private SpecificationModel specification;
 
-    private String ram;
-
-    private String rom;
-
-    private String screenSize;
-
-    private String backCamera;
-
-    private String frontCamera;
 }

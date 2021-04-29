@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import java.util.List;
 
 @Getter
@@ -30,14 +32,16 @@ public class ShopOrderProductResponse {
 
     private Integer discountPrice;
 
-    private String warranty;
-
-    private String emi;
+    private String shortDescription;
 
     private Double vat;
 
+    private String deliveryInfo;
+
+    @CollectionTable
+    @ElementCollection
     private List<String> productImages;
 
-    private ShopOrderVariantResponse variant;
+    private Integer quantity;
 
 }

@@ -31,6 +31,7 @@ public class OrderService {
     getAllOrders(String sortBy, boolean isCompleted, Sort.Direction sortDirection, int pageNo, int pageSize,
                  String orderId, String customerName, String customerPhoneNo, String area, String city, String orderStatus) {
 
+
         DeliveryAddressModel deliveryAddressModelExample = DeliveryAddressModel.builder()
                 .fullName(customerName)
                 .phoneNo(customerPhoneNo)
@@ -38,19 +39,11 @@ public class OrderService {
                 .city(city)
                 .build();
 
-//        List<OrderProductModel> orderProductModels1 = new ArrayList<>();
-//        ProductModel productModel1 = new ProductModel();
-//        productModel1.setProductName(productName);
-//        OrderProductModel orderProductModel1 = new OrderProductModel();
-//        orderProductModel1.setProduct(productModel1);
-//        orderProductModels1.add(orderProductModel1);
-
         OrderModel exampleOrder = OrderModel.builder()
                 .isCompleted(isCompleted)
                 .orderId(orderId)
                 .deliveryAddress(deliveryAddressModelExample)
                 .orderStatus(orderStatus)
-//                .orderItems(orderProductModels1)
                 .build();
 
         Pageable pageable;
@@ -63,7 +56,6 @@ public class OrderService {
                 .withMatcher("deliveryAddress.phoneNo", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
                 .withMatcher("deliveryAddress.area", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
                 .withMatcher("deliveryAddress.city", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
-//                .withMatcher("orderItems.product.productName", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
                 .withMatcher("orderId", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
                 .withMatcher("orderStatus", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
 
@@ -73,28 +65,10 @@ public class OrderService {
 
         for (OrderModel orderModel : orderModelPageable.getContent()) {
             List<OrderProductModel> orderProductModels = orderModel.getOrderItems();
-            List<ProductModel> productModels = new ArrayList<>();
-
-            for (OrderProductModel orderProductModel : orderProductModels) {
-                List<ProductVariantModel> productVariantModels = new ArrayList<>();
-                ProductVariantModel productVariantModel = orderProductModel.getProductVariant();
-                productVariantModel.setQuantity(orderProductModel.getQuantity());
-                productVariantModels.add(productVariantModel);
-
-                ProductModel productModel = orderProductModel.getProduct();
-                productModel.setVariants(productVariantModels);
-
-                productModels.add(productModel);
-            }
-
-            List<ShopOrderProductResponse> shopProductResponseList =
-                    new ArrayList<>(shopProductHelperService.shopOrderProductResponseFromProducts(productModels));
-
-//            List<OrderProcessHistoryModel> shopOrderProcessHistories = orderModel.getOrderProcessHistory();
 
             OrderResponse orderResponse = new OrderResponse(orderModel.getId(), orderModel.getOrderId(), orderModel.getInvoiceId(),
                     orderModel.getCreateBy(), orderModel.getCreatedOn(), orderModel.getUpdatedBy(), orderModel.getUpdatedOn(),
-                    orderModel.getUserName(), shopProductResponseList, orderModel.getDeliveryAddress(), orderModel.getOrderStatus(),
+                    orderModel.getUserName(), orderProductModels, orderModel.getDeliveryAddress(), orderModel.getOrderStatus(),
                     orderModel.getProductPriceTotal(), orderModel.getPaidAmount(), orderModel.getPaymentMethod(),
                     orderModel.getPaymentStatus(), orderModel.getShippingCharge(), orderModel.getAdminDiscount(),
                     orderModel.getAdminDiscountAddedBy(), orderModel.getCouponDiscount(), orderModel.getSubTotal(),
@@ -125,30 +99,31 @@ public class OrderService {
             String updatedBy = jwtProvider.getNameFromJwt(token);
             Long updateOn = System.currentTimeMillis();
 
+            if (orderProcessRequest.getOrderStatus().toString().equalsIgnoreCase("delivered") ||
+                    orderProcessRequest.getOrderStatus().toString().equalsIgnoreCase("canceled")) {
+                orderModel.setIsCompleted(true);
+            }
+
             List<OrderProcessHistoryModel> orderProcessHistoryModels = orderModel.getOrderProcessHistory();
 
             OrderProcessHistoryModel orderProcessHistoryModel = OrderProcessHistoryModel.builder()
                     .updateBy(updatedBy)
                     .updatedOn(updateOn)
-                    .orderStatus(orderProcessRequest.getOrderStatus())
+                    .orderStatus(orderProcessRequest.getOrderStatus().toString())
                     .employeeNote(orderProcessRequest.getEmployeeNote())
                     .customerNote(orderProcessRequest.getCustomerNote())
                     .build();
 
             orderProcessHistoryModels.add(orderProcessHistoryModel);
             orderModel.setOrderProcessHistory(orderProcessHistoryModels);
-            orderModel.setOrderStatus(orderProcessRequest.getOrderStatus());
+            orderModel.setOrderStatus(orderProcessRequest.getOrderStatus().toString());
             orderModel.setUpdatedBy(updatedBy);
             orderModel.setUpdatedOn(updateOn);
-
-            if(orderProcessRequest.getOrderStatus().equalsIgnoreCase("completed")){
-                orderModel.setIsCompleted(true);
-            }
 
             orderRepository.save(orderModel);
 
             return new ResponseEntity<>(new ApiResponse<>(201, "Updated Order Status Successful",
-                    orderProcessRequest.getOrderStatus()), HttpStatus.CREATED);
+                    orderProcessRequest.getOrderStatus().toString()), HttpStatus.CREATED);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order not found with id: " + orderId);
         }
@@ -157,12 +132,11 @@ public class OrderService {
     public ResponseEntity<ApiResponse<String>> deleteOrder(String orderId) {
         Optional<OrderModel> orderModelOptional = orderRepository.findById(orderId);
 
-        if(orderModelOptional.isPresent()){
+        if (orderModelOptional.isPresent()) {
             orderRepository.deleteById(orderId);
             return new ResponseEntity<>(new ApiResponse<>(200, "Order Delete Successful", null), HttpStatus.OK);
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Order Found with id: "+orderId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Order Found with id: " + orderId);
         }
     }
 }
