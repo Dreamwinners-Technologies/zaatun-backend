@@ -101,13 +101,13 @@ public class JwtProvider {
         }
     }
 
-    public String getRolesFromJwt(String token) {
+    public String getRolesFromJwt(String bearerToken) {
         try {
-            token = token.split("\\s+")[1];
+            bearerToken = bearerToken.split("\\s+")[1];
 
             return Jwts.parser()
                     .setSigningKey(jwtSecret)
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(bearerToken)
                     .getBody().get("scopes").toString();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "There is a problem in JWT Token");

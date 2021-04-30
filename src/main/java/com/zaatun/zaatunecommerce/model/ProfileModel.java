@@ -61,5 +61,7 @@ public class ProfileModel {
 
     private Boolean isAffiliate;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private AffiliateUserModel affiliateUser;
 
 }
