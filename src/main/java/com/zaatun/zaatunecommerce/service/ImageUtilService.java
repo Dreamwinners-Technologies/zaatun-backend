@@ -46,6 +46,8 @@ public class ImageUtilService {
                 JSONObject json = new JSONObject(response);
                 String url = json.getString("url");
 
+                url = url.replaceAll("http://", "https://");
+
                 photoLinksList.add(url);
 
             }
