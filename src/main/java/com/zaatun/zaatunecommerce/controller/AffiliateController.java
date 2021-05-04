@@ -19,12 +19,12 @@ import java.util.List;
 public class AffiliateController {
     private final AffiliateService affiliateService;
 
-    @GetMapping("/new")
-    public ResponseEntity<ApiResponse<PaginationResponse<List<ProfileModel>>>>
-    getNewAffiliateUsers(@RequestParam(defaultValue = "50") int pageSize,
-                         @RequestParam(defaultValue = "0") int pageNo) {
-        return affiliateService.getNewAffiliateUsers(pageSize, pageNo);
-    }
+//    @GetMapping("/new")
+//    public ResponseEntity<ApiResponse<PaginationResponse<List<ProfileModel>>>>
+//    getNewAffiliateUsers(@RequestParam(defaultValue = "50") int pageSize,
+//                         @RequestParam(defaultValue = "0") int pageNo) {
+//        return affiliateService.getNewAffiliateUsers(pageSize, pageNo);
+//    }
 
     @PostMapping("/{id}/approve")
     public ResponseEntity<ApiResponse<String>> approveAffiliate(@RequestHeader(name = "Authorization") String token,
@@ -40,9 +40,10 @@ public class AffiliateController {
                       @RequestParam(required = false) String phoneNo,
                       @RequestParam(required = false) String affiliateUserSlug,
                       @RequestParam(required = false, defaultValue = "createdOn") AffiliateUserSort sortBy,
-                      @RequestParam(required = false, defaultValue = "DESC")Sort.Direction sortDirection){
+                      @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortDirection,
+                      @RequestParam(required = false, defaultValue = "true") Boolean approvedUser){
 
-        return affiliateService.getAffiliateUserList(pageNo, pageSize, name, phoneNo, affiliateUserSlug, sortBy, sortDirection);
+        return affiliateService.getAffiliateUserList(pageNo, pageSize, name, phoneNo, affiliateUserSlug, sortBy, sortDirection, approvedUser);
     }
 
     @GetMapping("/withdraw")
@@ -51,9 +52,10 @@ public class AffiliateController {
                                               @RequestParam(required = false) String name,
                                               @RequestParam(required = false) String phoneNo,
                                               @RequestParam(required = false) String affiliateUserSlug,
-                                              @RequestParam(required = false) AffiliateUserSort sortBy,
-                                              @RequestParam(required = false)Sort.Direction sortDirection){
-        return affiliateService.getWithdrawRequests();
+                                              @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortDirection,
+                                              @RequestParam(required = false, defaultValue = "true") Boolean approvedWithdraws){
+
+        return affiliateService.getWithdrawRequests(pageNo, pageSize, name, phoneNo, affiliateUserSlug, sortDirection, approvedWithdraws);
     }
 
 

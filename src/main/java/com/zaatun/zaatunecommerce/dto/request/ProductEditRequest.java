@@ -23,6 +23,8 @@ public class ProductEditRequest {
     @NotBlank
     private String brand;
 
+    private String productBadge;
+
     private String categoryId;
 
     private String subCategoryId;

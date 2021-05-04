@@ -39,6 +39,8 @@ public class ProductModel {
 
     private String productSlug;
 
+    private String productBadge;
+
     @NotBlank
     private String SKU;
 

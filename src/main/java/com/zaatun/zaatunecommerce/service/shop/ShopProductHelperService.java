@@ -26,31 +26,7 @@ public class ShopProductHelperService {
         //Iterating the ProductModel and migrating to shopProductResponse then add to the ArrayList
         for (ProductModel productModel : productModels) {
 
-            //Getting the CategoryModel from the ProductModel
-            CategoryModel categoryModel = productModel.getCategoryModel();
-
-            //Migrating from CategoryModel to ShopCategoryResponse
-            ShopCategoryResponse shopCategoryResponse = new ShopCategoryResponse(
-                    categoryModel.getCategoryName(), categoryModel.getCategoryIcon(),
-                    categoryModel.getCategorySlug(), categoryModel.getCategoryImage(), null);
-
-            //Getting the SubCategoryModel from the ProductModel
-            SubCategoryModel subCategoryModel = productModel.getSubCategoryModel();
-
-            //Migrating from SubCategoryModel to ShopSubCategoryResponse
-            ShopSubCategoryResponse shopSubCategoryResponse = new ShopSubCategoryResponse(
-                    subCategoryModel.getSubCategoryName(), subCategoryModel.getSubCategoryIcon(),
-                    subCategoryModel.getSubCategorySlug(), subCategoryModel.getSubCategoryImage());
-
-            //Adding Data to ShopProductResponse from ProductModel
-            ShopProductResponse shopProductResponse = new ShopProductResponse(productModel.getProductName(),
-                    productModel.getProductSlug(), productModel.getSKU(), productModel.getBrand(), shopCategoryResponse,
-                    shopSubCategoryResponse, productModel.getRegularPrice(), productModel.getDiscountPrice(),
-                    productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
-                    productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
-                    productModel.getIsDiscount(), productModel.getVideoUrl(), productModel.getVat(),
-                    productModel.getProductImages(), productModel.getQuantity(), productModel.getProductReviews(),
-                    productModel.getBuyersId(), productModel.getSpecification());
+            ShopProductResponse shopProductResponse = migrateProductModelToShopProductResponse(productModel);
 
             //Adding the ShopProductResponse to the list
             shopProductResponses.add(shopProductResponse);
@@ -58,6 +34,35 @@ public class ShopProductHelperService {
 
         //Returning the list of ShopProductResponse
         return shopProductResponses;
+    }
+
+    public ShopProductResponse migrateProductModelToShopProductResponse(ProductModel productModel) {
+        //Getting the CategoryModel from the ProductModel
+        CategoryModel categoryModel = productModel.getCategoryModel();
+
+        //Migrating from CategoryModel to ShopCategoryResponse
+        ShopCategoryResponse shopCategoryResponse = new ShopCategoryResponse(
+                categoryModel.getCategoryName(), categoryModel.getCategoryIcon(),
+                categoryModel.getCategorySlug(), categoryModel.getCategoryImage(), null);
+
+        //Getting the SubCategoryModel from the ProductModel
+        SubCategoryModel subCategoryModel = productModel.getSubCategoryModel();
+
+        //Migrating from SubCategoryModel to ShopSubCategoryResponse
+        ShopSubCategoryResponse shopSubCategoryResponse = new ShopSubCategoryResponse(
+                subCategoryModel.getSubCategoryName(), subCategoryModel.getSubCategoryIcon(),
+                subCategoryModel.getSubCategorySlug(), subCategoryModel.getSubCategoryImage());
+
+        //Adding Data to ShopProductResponse from ProductModel
+        ShopProductResponse shopProductResponse = new ShopProductResponse(productModel.getProductName(),
+                productModel.getProductSlug(), productModel.getProductBadge(), productModel.getSKU(), productModel.getBrand(), shopCategoryResponse,
+                shopSubCategoryResponse, productModel.getRegularPrice(), productModel.getDiscountPrice(),
+                productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
+                productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
+                productModel.getIsDiscount(), productModel.getVideoUrl(), productModel.getVat(),
+                productModel.getProductImages(), productModel.getQuantity(), productModel.getProductReviews(),
+                productModel.getBuyersId(), productModel.getSpecification(), null);
+        return shopProductResponse;
     }
 
 //    public List<ShopOrderProductResponse> shopOrderProductResponseFromProducts(List<ProductModel> productModels) {

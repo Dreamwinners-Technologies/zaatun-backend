@@ -70,6 +70,7 @@ public class ProductService {
                     .createdOn(basicTableInfo.getCreationTime())
                     .productName(addProductRequest.getProductName())
                     .productSlug(basicTableInfo.getSlug())
+                    .productBadge(addProductRequest.getProductBadge())
                     .SKU(basicTableInfo.getSKU())
                     .brand(addProductRequest.getBrand())
                     .categoryModel(categoryModelOptional.get())
@@ -184,6 +185,7 @@ public class ProductService {
                 productModel.setUpdatedOn(basicTableInfo.getCreationTime());
                 productModel.setProductName(productEditRequest.getProductName());
                 productModel.setBrand(productEditRequest.getBrand());
+                productModel.setProductBadge(productEditRequest.getProductBadge());
                 productModel.setCategoryModel(categoryModelOptional.get());
                 productModel.setSubCategoryModel(subCategoryModelOptional.get());
                 productModel.setBuyingPrice(productEditRequest.getBuyingPrice());

@@ -20,6 +20,8 @@ public class ShopProductResponse {
 
     private String productSlug;
 
+    private String productBadge;
+
     private String SKU;
 
     private String brand;
@@ -59,5 +61,7 @@ public class ShopProductResponse {
     private Set<String> buyersId;
 
     private SpecificationModel specification;
+
+    private String referralId;
 
 }

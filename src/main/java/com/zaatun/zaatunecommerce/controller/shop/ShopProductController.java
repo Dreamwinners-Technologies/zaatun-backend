@@ -5,6 +5,7 @@ import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
 import com.zaatun.zaatunecommerce.service.shop.ShopProductService;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +34,12 @@ public class ShopProductController {
         return shopProductService.getProducts(productName, brand, categoryId, subCategoryId, productSlug, inStock,
                 isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera, sortBy, orderBy,
                 pageSize, pageNo, rating );
+    }
+
+    @GetMapping("/{productSlug}")
+    public ResponseEntity<ApiResponse<ShopProductResponse>> getProductBySlug(@PathVariable String productSlug,
+                                                                             @RequestParam(required = false) String affiliateUserSlug){
+
+        return shopProductService.getProductBySlug(productSlug, affiliateUserSlug);
     }
 }

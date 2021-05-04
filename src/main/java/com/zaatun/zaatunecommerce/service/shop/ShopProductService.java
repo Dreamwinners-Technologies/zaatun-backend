@@ -3,18 +3,20 @@ package com.zaatun.zaatunecommerce.service.shop;
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
-import com.zaatun.zaatunecommerce.model.CategoryModel;
-import com.zaatun.zaatunecommerce.model.ProductModel;
-import com.zaatun.zaatunecommerce.model.SpecificationModel;
-import com.zaatun.zaatunecommerce.model.SubCategoryModel;
+import com.zaatun.zaatunecommerce.model.*;
+import com.zaatun.zaatunecommerce.repository.AffiliateUserRepository;
+import com.zaatun.zaatunecommerce.repository.AffiliateUserTrackerRepository;
 import com.zaatun.zaatunecommerce.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -23,6 +25,8 @@ public class ShopProductService {
     //Data access repositories
     private final ProductRepository productRepository;
     private final ShopProductHelperService shopProductHelperService;
+    private final AffiliateUserRepository affiliateUserRepository;
+    private final AffiliateUserTrackerRepository affiliateUserTrackerRepository;
 
     //Get All products with filtering options for Store
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>>
@@ -91,5 +95,38 @@ public class ShopProductService {
     }
 
 
+    public ResponseEntity<ApiResponse<ShopProductResponse>> getProductBySlug(String productSlug, String affiliateUserSlug) {
+        Optional<ProductModel> productModelOptional = productRepository.findByProductSlug(productSlug);
+
+        if (productModelOptional.isPresent()) {
+            ProductModel productModel = productModelOptional.get();
+
+            ShopProductResponse shopProductResponse = shopProductHelperService.migrateProductModelToShopProductResponse(productModel);
+
+            if (affiliateUserSlug != null && !affiliateUserSlug.isEmpty()) {
+                Optional<AffiliateUserModel> affiliateUserModelOptional = affiliateUserRepository.findByAffiliateUserSlug(affiliateUserSlug);
+                if (affiliateUserModelOptional.isPresent()) {
+                    AffiliateUserModel affiliateUserModel = affiliateUserModelOptional.get();
+
+                    if(affiliateUserModel.getProfileModel().getIsAffiliate()){
+                        String referralId = UUID.randomUUID().toString();
+                        AffiliateUserTrackerModel affiliateUserTrackerModel = new AffiliateUserTrackerModel(referralId,
+                                productModel.getProductSlug(), affiliateUserModel.getAffiliateUserSlug());
+
+                        affiliateUserTrackerRepository.save(affiliateUserTrackerModel);
+                        shopProductResponse.setReferralId(referralId);
+                    }
+
+                } else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Affiliate User found with this Id: " + affiliateUserSlug);
+                }
+            }
+
+            return new ResponseEntity<>(new ApiResponse<>(200, "Product Found", shopProductResponse), HttpStatus.OK);
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product found with slug: " + productSlug);
+        }
+    }
 }
 

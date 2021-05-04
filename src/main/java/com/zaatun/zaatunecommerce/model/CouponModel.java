@@ -1,6 +1,5 @@
 package com.zaatun.zaatunecommerce.model;
 
-import liquibase.pro.packaged.E;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
