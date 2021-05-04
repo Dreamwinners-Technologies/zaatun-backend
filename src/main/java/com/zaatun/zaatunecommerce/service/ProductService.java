@@ -2,10 +2,7 @@ package com.zaatun.zaatunecommerce.service;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
-import com.zaatun.zaatunecommerce.dto.request.AddDynamicSpecificationRequest;
-import com.zaatun.zaatunecommerce.dto.request.AddProductRequest;
-import com.zaatun.zaatunecommerce.dto.request.AddSpecificationRequest;
-import com.zaatun.zaatunecommerce.dto.request.ProductEditRequest;
+import com.zaatun.zaatunecommerce.dto.request.*;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.CategoryRepository;
@@ -64,6 +61,8 @@ public class ProductService {
                     .dynamicSpecifications(dynamicSpecificationModels)
                     .build();
 
+//            List<String> imageLinks = new ArrayList<>();
+
             ProductModel productModel = ProductModel.builder()
                     .productId(basicTableInfo.getId())
                     .createdBy(basicTableInfo.getCreateBy())
@@ -91,6 +90,7 @@ public class ProductService {
                     .quantity(addProductRequest.getQuantity())
                     .totalSold(0L)
                     .specification(specificationModel)
+//                    .productImages(imageLinks)
                     .build();
 
 
@@ -235,11 +235,43 @@ public class ProductService {
 
             productModel.setUpdatedBy(basicTableInfo.getCreateBy());
             productModel.setUpdatedOn(basicTableInfo.getCreationTime());
-            productModel.setProductImages(imageLinks);
+
+            List<String> productImageLinks = productModel.getProductImages();
+
+
+            productImageLinks.addAll(imageLinks);
 
             productRepository.save(productModel);
 
             return new ResponseEntity<>(new ApiResponse<>(200, "Image Uploaded", imageLinks), HttpStatus.OK);
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found");
+    }
+
+    public ResponseEntity<ApiResponse<String>> deleteProductImages(String token, String productId,
+                                                                         DeleteImageRequest deleteImageRequest) {
+        Optional<ProductModel> productModelOptional = productRepository.findById(productId);
+
+        if (productModelOptional.isPresent()) {
+            BasicTableInfo basicTableInfo = utilService.generateBasicTableInfo("", token);
+
+            ProductModel productModel = productModelOptional.get();
+
+            productModel.setUpdatedBy(basicTableInfo.getCreateBy());
+            productModel.setUpdatedOn(basicTableInfo.getCreationTime());
+
+            List<String> imageLinks = productModel.getProductImages();
+
+            if(imageLinks.contains(deleteImageRequest.getImageLink())){
+                imageLinks.remove(deleteImageRequest.getImageLink());
+            }
+            else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image link is not matched with product");
+            }
+
+            productRepository.save(productModel);
+
+            return new ResponseEntity<>(new ApiResponse<>(200, "Image Deleted", null), HttpStatus.OK);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found");
     }

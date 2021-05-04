@@ -2,6 +2,7 @@ package com.zaatun.zaatunecommerce.controller;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.AddProductRequest;
+import com.zaatun.zaatunecommerce.dto.request.DeleteImageRequest;
 import com.zaatun.zaatunecommerce.dto.request.ProductEditRequest;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
 import com.zaatun.zaatunecommerce.service.ProductService;
@@ -60,4 +61,12 @@ public class ProductController {
         return productService.addProductImages(token, productId, mpFiles);
     }
 
+    @DeleteMapping("/image/{productId}")
+    public ResponseEntity<ApiResponse<String>> deleteProductImages(@RequestHeader(name = "Authorization") String token,
+                                                                         @PathVariable String productId,
+                                                                         @RequestBody DeleteImageRequest deleteImageRequest){
+        return productService.deleteProductImages(token, productId, deleteImageRequest);
+    }
 }
+
+// Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJaVE4tVS0wMTUxNTIxMjY4NyIsIm5hbWUiOiJIYWJpYiIsInNjb3BlcyI6IlVTRVIiLCJpYXQiOjE2MjAxNTU0NzEsImV4cCI6MTYyMjI1NTQ3MX0.7rXza8GFfVgYGnVoGe9MHtVDQasPEOKMF31-m_k3cZ7gHiez_nS5q_rM_vEFo-Z_kjKfL49jJymaFwWtvREQGQ
