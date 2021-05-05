@@ -1,5 +1,5 @@
 package com.zaatun.zaatunecommerce.dto.request;
 
-public enum AffiliateUserSort {
+public enum AffiliateUserSortEnum {
     affiliateBalance, completedAffiliateProducts, totalSold, createdOn;
 }

@@ -36,6 +36,8 @@ public class CategoryModel {
 
     private String categoryImage;
 
+    private String verticalImage;
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<SubCategoryModel> subCategories;
 }

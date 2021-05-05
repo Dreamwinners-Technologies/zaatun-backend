@@ -111,7 +111,7 @@ public class ShopProductService {
                     if(affiliateUserModel.getProfileModel().getIsAffiliate()){
                         String referralId = UUID.randomUUID().toString();
                         AffiliateUserTrackerModel affiliateUserTrackerModel = new AffiliateUserTrackerModel(referralId,
-                                productModel.getProductSlug(), affiliateUserModel.getAffiliateUserSlug());
+                                productModel.getProductSlug(), affiliateUserModel);
 
                         affiliateUserTrackerRepository.save(affiliateUserTrackerModel);
                         shopProductResponse.setReferralId(referralId);
@@ -129,4 +129,6 @@ public class ShopProductService {
         }
     }
 }
+
+
 

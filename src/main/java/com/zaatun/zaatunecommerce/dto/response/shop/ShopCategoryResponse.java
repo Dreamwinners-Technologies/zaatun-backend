@@ -19,5 +19,7 @@ public class ShopCategoryResponse {
 
     private String categoryImage;
 
+    private String verticalImage;
+
     private List<ShopSubCategoryResponse> shopSubCategories;
 }

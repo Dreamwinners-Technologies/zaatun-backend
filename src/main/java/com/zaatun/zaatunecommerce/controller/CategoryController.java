@@ -2,6 +2,7 @@ package com.zaatun.zaatunecommerce.controller;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.CategoryAddEditRequest;
+import com.zaatun.zaatunecommerce.dto.request.CategoryImageEnum;
 import com.zaatun.zaatunecommerce.dto.request.SubCategoryAddEditRequest;
 import com.zaatun.zaatunecommerce.model.CategoryModel;
 import com.zaatun.zaatunecommerce.service.CategoryImageService;
@@ -44,17 +45,6 @@ public class CategoryController {
         return categoryService.getCategoriesList();
     }
 
-    @PostMapping("image/{categoryId}")
-    public ResponseEntity<ApiResponse<String>> addCategoryImage(@RequestHeader(name = "Authorization") String token,
-                                                                @PathVariable String categoryId, MultipartFile mpFile){
-        return categoryImageService.uploadCategoryImage(categoryId, mpFile, token);
-    }
-
-    @DeleteMapping("image/{categoryId}")
-    public ResponseEntity<ApiResponse<String>> deleteCategoryImage(@RequestHeader(name = "Authorization") String token,
-                                                                   @PathVariable String categoryId){
-        return categoryImageService.deleteCategoryImage(categoryId, token);
-    }
 
 
     @PostMapping("{categoryId}/subCategories")
@@ -91,5 +81,19 @@ public class CategoryController {
         return categoryImageService.deleteSubCategoryImage(categoryId, token, subCategoryId);
     }
 
+    @PostMapping("image/{categoryId}")
+    public ResponseEntity<ApiResponse<String>> addCategoryImage(@RequestHeader(name = "Authorization") String token,
+                                                                @PathVariable String categoryId, MultipartFile mpFile,
+                                                                @RequestParam CategoryImageEnum categoryImagePosition){
+
+        return categoryImageService.uploadCategoryImage(categoryId, mpFile, token, categoryImagePosition);
+    }
+
+    @DeleteMapping("image/{categoryId}")
+    public ResponseEntity<ApiResponse<String>> deleteCategoryImage(@RequestHeader(name = "Authorization") String token,
+                                                                   @PathVariable String categoryId,
+                                                                   @RequestParam CategoryImageEnum categoryImagePosition){
+        return categoryImageService.deleteCategoryImage(categoryId, token, categoryImagePosition);
+    }
 
 }

@@ -141,6 +141,10 @@ public class ShopOrderService {
                     profileModel.setTotalOrders(profileModel.getTotalOrders() + 1);     //Increase total order of user
                     profileModel.setTotalOrderAmounts(profileModel.getTotalOrderAmounts() + totalAmount);       //Increase total amount of user
 
+                    //Affiliate Functionality starts
+                    shopOrderServiceExtended.affiliateFunctionalities(orderPlaceRequest, profileModel, productModels);
+
+
                     orderRepository.save(orderModel);
                     productRepository.saveAll(productModels);
                     profileRepository.save(profileModel);
@@ -157,6 +161,7 @@ public class ShopOrderService {
         }
 
     }
+
 
     private List<OrderProcessHistoryModel> getOrderProcessHistoryModels(String username, BasicTableInfo basicTableInfo) {
         List<OrderProcessHistoryModel> orderProcessHistoryModels = new ArrayList<>();

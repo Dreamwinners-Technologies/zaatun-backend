@@ -1,6 +1,7 @@
 package com.zaatun.zaatunecommerce.service;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
+import com.zaatun.zaatunecommerce.dto.request.CategoryImageEnum;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.CategoryModel;
 import com.zaatun.zaatunecommerce.model.SubCategoryModel;
@@ -25,7 +26,7 @@ public class CategoryImageService {
     private final ImageUtilService imageUtilService;
     private final JwtProvider jwtProvider;
 
-    public ResponseEntity<ApiResponse<String>> uploadCategoryImage(String categoryId, MultipartFile mpFile, String token) {
+    public ResponseEntity<ApiResponse<String>> uploadCategoryImage(String categoryId, MultipartFile mpFile, String token, CategoryImageEnum categoryImagePosition) {
 
         Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
 
@@ -36,7 +37,15 @@ public class CategoryImageService {
             multipartFiles[0] = mpFile;
             List<String> imageUrl = imageUtilService.uploadImage(multipartFiles);
 
-            categoryModel.setCategoryImage(imageUrl.get(0));
+//            categoryModel.setCategoryImage(imageUrl.get(0));
+
+            if(categoryImagePosition.equals(CategoryImageEnum.NormalImage)){
+                categoryModel.setCategoryImage(imageUrl.get(0));
+            }
+            else {
+                categoryModel.setVerticalImage(imageUrl.get(0));
+            }
+
             categoryModel.setUpdateBy(jwtProvider.getNameFromJwt(token));
             categoryModel.setUpdateTime(System.currentTimeMillis());
 
@@ -49,13 +58,19 @@ public class CategoryImageService {
         }
     }
 
-    public ResponseEntity<ApiResponse<String>> deleteCategoryImage(String categoryId, String token) {
+    public ResponseEntity<ApiResponse<String>> deleteCategoryImage(String categoryId, String token, CategoryImageEnum categoryImagePosition) {
         Optional<CategoryModel> categoryModelOptional = categoryRepository.findById(categoryId);
 
         if (categoryModelOptional.isPresent()) {
             CategoryModel categoryModel = categoryModelOptional.get();
 
-            categoryModel.setCategoryImage(null);
+            if(categoryImagePosition.equals(CategoryImageEnum.NormalImage)){
+                categoryModel.setCategoryImage(null);
+            }
+            else {
+                categoryModel.setVerticalImage(null);
+            }
+
             categoryModel.setUpdateBy(jwtProvider.getNameFromJwt(token));
             categoryModel.setUpdateTime(System.currentTimeMillis());
 

@@ -1,7 +1,7 @@
 package com.zaatun.zaatunecommerce.service;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
-import com.zaatun.zaatunecommerce.dto.request.AffiliateUserSort;
+import com.zaatun.zaatunecommerce.dto.request.AffiliateUserSortEnum;
 import com.zaatun.zaatunecommerce.dto.response.AffiliateWithdrawResponse;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
@@ -82,7 +82,7 @@ public class AffiliateService {
 
     public ResponseEntity<ApiResponse<PaginationResponse<List<ProfileModel>>>>
     getAffiliateUserList(int pageNo, int pageSize, String name, String phoneNo, String affiliateUserSlug,
-                         AffiliateUserSort sortBy, Sort.Direction sortDirection, Boolean newUser) {
+                         AffiliateUserSortEnum sortBy, Sort.Direction sortDirection, Boolean newUser) {
 
         ProfileModel exampleProfile = ProfileModel.builder()
                 .name(name)

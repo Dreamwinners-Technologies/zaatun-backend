@@ -1,5 +1,6 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
+import com.zaatun.zaatunecommerce.dto.request.shop.OrderPlaceRequest;
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderProductRequest;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistoryResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
@@ -20,6 +21,8 @@ public class ShopOrderServiceExtended {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final CouponRepository couponRepository;
+    private final AffiliateUserTrackerRepository affiliateUserTrackerRepository;
+    private final AffiliateUserRepository affiliateUserRepository;
 
     Optional<DeliveryAddressModel> getDeliveryAddress(ProfileModel profileModel, Long deliveryAddressId) {
         List<DeliveryAddressModel> deliveryAddressModelList = profileModel.getDeliveryAddresses();
@@ -191,5 +194,43 @@ public class ShopOrderServiceExtended {
         orderProductModel.setQuantity(productModel.getQuantity());
 
         return orderProductModel;
+    }
+
+    public void affiliateFunctionalities(OrderPlaceRequest orderPlaceRequest, ProfileModel profileModel, List<ProductModel> productModels) {
+        List<AffiliateUserTrackerModel> affiliateUserTrackerModels =
+                affiliateUserTrackerRepository.findAllById(orderPlaceRequest.getAffiliateReferralIds()); //Get Al affiliate user trackers info
+
+        for (AffiliateUserTrackerModel userTrackerModel : affiliateUserTrackerModels) {
+            //Checking if any product from affiliate tracker matched with order products
+            for (ProductModel productModel : productModels) {
+                if (userTrackerModel.getProductSlug().equals(productModel.getProductSlug())) {
+                    AffiliateUserModel affiliateUserModel = userTrackerModel.getAffiliateUserModel();
+
+                    if (profileModel.getIsAffiliate() != null && profileModel.getAffiliateUser().getAffiliateUserSlug()
+                            .equals(affiliateUserModel.getAffiliateUserSlug())) {
+                        //If Order and Affiliate Referer is same then do nothing
+                        continue;
+                    }
+
+                    if (affiliateUserModel.getProfileModel().getIsAffiliate()) {    //After matching, Getting the affiliate details
+                        //Calculate the affiliate amount
+                        Double affiliatePercentage = productModel.getAffiliatePercentage();
+                        Integer affiliateAmount = (int) (productModel.getRegularPrice() * affiliatePercentage / 100);
+
+                        //Setting the data to affiliate user
+                        Integer tempBalance = affiliateUserModel.getAffiliateBalance();
+                        affiliateUserModel.setAffiliateBalance(tempBalance + affiliateAmount);
+                        affiliateUserModel.setCompletedAffiliateProducts(
+                                affiliateUserModel.getCompletedAffiliateProducts() + 1);
+                        affiliateUserModel.setTotalSold(affiliateUserModel.getTotalSold() + productModel.getRegularPrice());
+
+                        affiliateUserRepository.save(affiliateUserModel);
+                        affiliateUserTrackerRepository.delete(userTrackerModel);    //Delete the affiliate refer tracking info
+                    }
+
+                }
+            }
+
+        }
     }
 }

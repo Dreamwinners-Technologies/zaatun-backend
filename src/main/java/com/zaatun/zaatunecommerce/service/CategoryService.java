@@ -31,7 +31,7 @@ public class CategoryService {
 
         CategoryModel categoryModel = new CategoryModel(basicTableInfo.getId(), basicTableInfo.getCreationTime(),
                 basicTableInfo.getCreateBy(), null, null, categoryAddEditRequest.getCategoryName(), categoryAddEditRequest.getCategoryIcon(),
-                basicTableInfo.getSlug(), null, null);
+                basicTableInfo.getSlug(), null, null, null);
 
         categoryRepository.save(categoryModel);
 

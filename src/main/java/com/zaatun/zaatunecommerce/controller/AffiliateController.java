@@ -1,7 +1,7 @@
 package com.zaatun.zaatunecommerce.controller;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
-import com.zaatun.zaatunecommerce.dto.request.AffiliateUserSort;
+import com.zaatun.zaatunecommerce.dto.request.AffiliateUserSortEnum;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.model.ProfileModel;
 import com.zaatun.zaatunecommerce.service.AffiliateService;
@@ -39,7 +39,7 @@ public class AffiliateController {
                       @RequestParam(required = false) String name,
                       @RequestParam(required = false) String phoneNo,
                       @RequestParam(required = false) String affiliateUserSlug,
-                      @RequestParam(required = false, defaultValue = "createdOn") AffiliateUserSort sortBy,
+                      @RequestParam(required = false, defaultValue = "createdOn") AffiliateUserSortEnum sortBy,
                       @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortDirection,
                       @RequestParam(required = false, defaultValue = "true") Boolean approvedUser){
 

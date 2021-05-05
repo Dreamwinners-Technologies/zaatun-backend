@@ -40,7 +40,7 @@ public class ShopCategoryService {
 
                 ShopCategoryResponse shopCategoryResponse = new ShopCategoryResponse(categoryModel.getCategoryName(),
                         categoryModel.getCategoryIcon(), categoryModel.getCategorySlug(), categoryModel.getCategoryImage(),
-                        shopSubCategoryResponses);
+                        categoryModel.getVerticalImage(), shopSubCategoryResponses);
 
                 shopCategoryResponseList.add(shopCategoryResponse);
             }

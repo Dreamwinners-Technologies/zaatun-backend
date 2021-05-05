@@ -43,7 +43,8 @@ public class ShopProductHelperService {
         //Migrating from CategoryModel to ShopCategoryResponse
         ShopCategoryResponse shopCategoryResponse = new ShopCategoryResponse(
                 categoryModel.getCategoryName(), categoryModel.getCategoryIcon(),
-                categoryModel.getCategorySlug(), categoryModel.getCategoryImage(), null);
+                categoryModel.getCategorySlug(), categoryModel.getCategoryImage(),
+                 categoryModel.getVerticalImage(),null);
 
         //Getting the SubCategoryModel from the ProductModel
         SubCategoryModel subCategoryModel = productModel.getSubCategoryModel();
