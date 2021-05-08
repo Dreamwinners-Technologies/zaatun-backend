@@ -1,6 +1,8 @@
 package com.zaatun.zaatunecommerce.dto.response.shop;
 
+import com.zaatun.zaatunecommerce.model.ProductAttributesModel;
 import com.zaatun.zaatunecommerce.model.ProductReviewModel;
+import com.zaatun.zaatunecommerce.model.ProductVariationModel;
 import com.zaatun.zaatunecommerce.model.SpecificationModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,10 +32,6 @@ public class ShopProductResponse {
 
     private ShopSubCategoryResponse subCategory;
 
-    private Integer regularPrice;
-
-    private Integer discountPrice;
-
     private String description;
 
     private String shortDescription;
@@ -54,8 +52,6 @@ public class ShopProductResponse {
 
     private List<String> productImages;
 
-    private Integer quantity;
-
     private List<ProductReviewModel> productReviews;
 
     private Set<String> buyersId;
@@ -63,5 +59,9 @@ public class ShopProductResponse {
     private SpecificationModel specification;
 
     private String referralId;
+
+    private List<ProductAttributesModel> attributes;
+
+    private List<ShopVariationResponse> variations;
 
 }

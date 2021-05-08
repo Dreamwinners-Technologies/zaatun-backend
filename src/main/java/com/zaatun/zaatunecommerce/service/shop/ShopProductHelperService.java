@@ -1,10 +1,7 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.response.shop.*;
-import com.zaatun.zaatunecommerce.model.CategoryModel;
-import com.zaatun.zaatunecommerce.model.ProductModel;
-import com.zaatun.zaatunecommerce.model.ProductVariantModel;
-import com.zaatun.zaatunecommerce.model.SubCategoryModel;
+import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,15 +51,26 @@ public class ShopProductHelperService {
                 subCategoryModel.getSubCategoryName(), subCategoryModel.getSubCategoryIcon(),
                 subCategoryModel.getSubCategorySlug(), subCategoryModel.getSubCategoryImage());
 
+        List<ShopVariationResponse> shopVariationResponses = new ArrayList<>();
+
+        for (ProductVariationModel productVariationModel: productModel.getVariations()){
+            ShopVariationResponse shopVariationResponse = new ShopVariationResponse(productVariationModel.getId(),
+                    productVariationModel.getStock(), productVariationModel.getInStock(), productVariationModel.getIsDefault(),
+                    productVariationModel.getRegularPrice(), productVariationModel.getDiscountPrice(),
+                    productVariationModel.getAttributeCombinations());
+
+            shopVariationResponses.add(shopVariationResponse);
+        }
+
         //Adding Data to ShopProductResponse from ProductModel
         ShopProductResponse shopProductResponse = new ShopProductResponse(productModel.getProductName(),
                 productModel.getProductSlug(), productModel.getProductBadge(), productModel.getSKU(), productModel.getBrand(), shopCategoryResponse,
-                shopSubCategoryResponse, productModel.getRegularPrice(), productModel.getDiscountPrice(),
-                productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
+                shopSubCategoryResponse, productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
                 productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
                 productModel.getIsDiscount(), productModel.getVideoUrl(), productModel.getVat(),
-                productModel.getProductImages(), productModel.getQuantity(), productModel.getProductReviews(),
-                productModel.getBuyersId(), productModel.getSpecification(), null);
+                productModel.getProductImages(), productModel.getProductReviews(),
+                productModel.getBuyersId(), productModel.getSpecification(), null, productModel.getProductAttributeModels(),
+                shopVariationResponses);
         return shopProductResponse;
     }
 

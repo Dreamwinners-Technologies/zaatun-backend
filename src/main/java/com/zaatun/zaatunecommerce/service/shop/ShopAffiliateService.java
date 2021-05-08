@@ -1,6 +1,8 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopAffiliateUserResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopAffiliateWithdrawResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.AffiliateUserModel;
 import com.zaatun.zaatunecommerce.model.AffiliateWithdrawModel;
@@ -99,6 +101,54 @@ public class ShopAffiliateService {
 
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Profile Found");
+        }
+    }
+
+    public ResponseEntity<ApiResponse<ShopAffiliateUserResponse>> getAffiliateInfo(String token) {
+        String username = jwtProvider.getUserNameFromJwt(token);
+
+        Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(username);
+
+        if(profileModelOptional.isPresent()){
+            ProfileModel profileModel = profileModelOptional.get();
+
+
+            if(profileModel.getIsAffiliate()){
+
+                AffiliateUserModel affiliateUserModel = profileModel.getAffiliateUser();
+                List<ShopAffiliateWithdrawResponse> shopAffiliateWithdrawResponses = new ArrayList<>();
+
+                for (AffiliateWithdrawModel affiliateWithdrawModel: affiliateUserModel.getAffiliateWithdrawModels()){
+                    ShopAffiliateWithdrawResponse shopAffiliateWithdrawResponse = new ShopAffiliateWithdrawResponse(
+                            affiliateWithdrawModel.getWithdrawAmount(), affiliateWithdrawModel.getMassage(),
+                            affiliateWithdrawModel.getIsApproved(), affiliateWithdrawModel.getIsCompleted());
+
+                    shopAffiliateWithdrawResponses.add(shopAffiliateWithdrawResponse);
+                }
+
+                ShopAffiliateUserResponse shopAffiliateUserResponse = new ShopAffiliateUserResponse(affiliateUserModel.getIsApproved(),
+                        affiliateUserModel.getUsername(), affiliateUserModel.getAffiliateUserSlug(),
+                        affiliateUserModel.getAffiliateBalance(), affiliateUserModel.getCompletedAffiliateProducts(),
+                        affiliateUserModel.getTotalSold(), shopAffiliateWithdrawResponses);
+
+                return new ResponseEntity<>(new ApiResponse<>(200, "Affiliate User Found", shopAffiliateUserResponse),
+                        HttpStatus.OK);
+            }
+            else {
+                if(profileModel.getAffiliateUser() != null && profileModel.getAffiliateUser().getIsApproved()){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your Affiliate Account is Postponed. Please Contact with Admin.");
+                }
+                else if(profileModel.getAffiliateUser() != null && !profileModel.getAffiliateUser().getIsApproved()){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your Affiliate Account is not Approved.Please Wait Some time.");
+                }
+                else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Affiliate Account Found.");
+                }
+            }
+
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile Not Found.");
         }
     }
 }

@@ -6,6 +6,7 @@ import com.zaatun.zaatunecommerce.dto.request.*;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.CategoryRepository;
+import com.zaatun.zaatunecommerce.repository.ProductAttributesModelRepository;
 import com.zaatun.zaatunecommerce.repository.ProductRepository;
 import com.zaatun.zaatunecommerce.repository.SubCategoryRepository;
 import lombok.*;
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -29,6 +31,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final ImageUtilService imageUtilService;
+    private final ProductAttributesModelRepository productAttributesModelRepository;
 
 
     public ResponseEntity<ApiResponse<String>> addProduct(String token, AddProductRequest addProductRequest) {
@@ -63,6 +66,7 @@ public class ProductService {
 
 //            List<String> imageLinks = new ArrayList<>();
 
+
             ProductModel productModel = ProductModel.builder()
                     .productId(basicTableInfo.getId())
                     .createdBy(basicTableInfo.getCreateBy())
@@ -74,9 +78,6 @@ public class ProductService {
                     .brand(addProductRequest.getBrand())
                     .categoryModel(categoryModelOptional.get())
                     .subCategoryModel(subCategoryModelOptional.get())
-                    .buyingPrice(addProductRequest.getBuyingPrice())
-                    .regularPrice(addProductRequest.getRegularPrice())
-                    .discountPrice(addProductRequest.getDiscountPrice())
                     .description(addProductRequest.getDescription())
                     .shortDescription(addProductRequest.getShortDescription())
                     .warranty(addProductRequest.getWarranty())
@@ -87,12 +88,23 @@ public class ProductService {
                     .videoUrl(addProductRequest.getVideoUrl())
                     .affiliatePercentage(addProductRequest.getAffiliatePercentage())
                     .vat(addProductRequest.getVat())
-                    .quantity(addProductRequest.getQuantity())
                     .totalSold(0L)
                     .specification(specificationModel)
+                    .productAttributeModels(addProductRequest.getProductAttributeModels())
 //                    .productImages(imageLinks)
                     .build();
 
+
+            List<ProductVariationModel> productVariationModels = new ArrayList<>();
+            for (AddVariationRequest addVariationRequest: addProductRequest.getVariations()){
+                ProductVariationModel productVariationModel = new ProductVariationModel(0L, addVariationRequest.getStock(),
+                        addVariationRequest.getInStock(), addVariationRequest.getIsDefault(), addVariationRequest.getBuyingPrice(),
+                        addVariationRequest.getRegularPrice(), addVariationRequest.getDiscountPrice(),
+                        addVariationRequest.getAttributeCombinations(), productModel);
+                productVariationModels.add(productVariationModel);
+            }
+
+            productModel.setVariations(productVariationModels);
 
             productRepository.save(productModel);
 
@@ -188,9 +200,6 @@ public class ProductService {
                 productModel.setProductBadge(productEditRequest.getProductBadge());
                 productModel.setCategoryModel(categoryModelOptional.get());
                 productModel.setSubCategoryModel(subCategoryModelOptional.get());
-                productModel.setBuyingPrice(productEditRequest.getBuyingPrice());
-                productModel.setRegularPrice(productEditRequest.getRegularPrice());
-                productModel.setDiscountPrice(productEditRequest.getDiscountPrice());
                 productModel.setDescription(productEditRequest.getDescription());
                 productModel.setShortDescription(productEditRequest.getShortDescription());
                 productModel.setWarranty(productEditRequest.getEmi());
@@ -200,8 +209,30 @@ public class ProductService {
                 productModel.setVideoUrl(productEditRequest.getVideoUrl());
                 productModel.setAffiliatePercentage(productEditRequest.getAffiliatePercentage());
                 productModel.setVat(productEditRequest.getVat());
-                productModel.setQuantity(productEditRequest.getQuantity());
                 productModel.setSpecification(specificationModel);
+                productModel.setDeliveryInfo(productEditRequest.getDeliveryInfo());
+                productModel.setKey(productEditRequest.getKey());
+                productModel.setValue(productEditRequest.getValue());
+
+                productModel.setProductAttributeModels(productEditRequest.getProductAttributeModels());
+
+                List<ProductVariationModel> productVariationModels = new ArrayList<>();
+                for (ProductVariationModel productVariationModel: productEditRequest.getVariations()){
+                    if(productVariationModel.getId() != null){
+                        productVariationModels.add(productVariationModel);
+                    }
+                    else {
+                        ProductVariationModel newProductVariationModel = new ProductVariationModel(0L, productVariationModel.getStock(),
+                                productVariationModel.getInStock(), productVariationModel.getIsDefault(),
+                                productVariationModel.getBuyingPrice(), productVariationModel.getRegularPrice(),
+                                productVariationModel.getDiscountPrice(), productVariationModel.getAttributeCombinations(), productModel);
+
+                        productVariationModels.add(newProductVariationModel);
+                    }
+
+                }
+
+                productModel.setVariations(productVariationModels);
 
                 productRepository.save(productModel);
 
@@ -274,5 +305,23 @@ public class ProductService {
             return new ResponseEntity<>(new ApiResponse<>(200, "Image Deleted", null), HttpStatus.OK);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found");
+    }
+
+    public ResponseEntity<ApiResponse<ProductAttributesModel>> addProductAttributes(String token, AddAttributesRequest addAttributesRequest) {
+        String id = UUID.randomUUID().toString();
+
+        List<ProductAttribute> productAttributeList = new ArrayList<>();
+
+        for (String attribute: addAttributesRequest.getValues()){
+            ProductAttribute productAttribute = new ProductAttribute(0L, attribute);
+            productAttributeList.add(productAttribute);
+        }
+
+        ProductAttributesModel productAttributesModel = new ProductAttributesModel(id, addAttributesRequest.getAttributeName(),
+                productAttributeList);
+
+        productAttributesModel = productAttributesModelRepository.save(productAttributesModel);
+
+        return new ResponseEntity<>(new ApiResponse<>(201, "Attributes Created", productAttributesModel), HttpStatus.CREATED);
     }
 }

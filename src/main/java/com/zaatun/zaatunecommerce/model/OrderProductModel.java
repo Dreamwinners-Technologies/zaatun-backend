@@ -1,5 +1,6 @@
 package com.zaatun.zaatunecommerce.model;
 
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopVariationResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,10 +32,6 @@ public class OrderProductModel {
 
     private String subCategoryName;
 
-    private Integer regularPrice;
-
-    private Integer discountPrice;
-
     private String shortDescription;
 
     private Double vat;
@@ -47,4 +44,9 @@ public class OrderProductModel {
 
     private Integer quantity;
 
+    private String variation;
+
+    private Integer price;
+
 }
+

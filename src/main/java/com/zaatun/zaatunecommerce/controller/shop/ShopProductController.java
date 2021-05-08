@@ -21,7 +21,7 @@ public class ShopProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>> getProducts(@RequestParam(required = false) String productName, String brand,
-                                                                                                  String categoryId, String subCategoryId, String productSlug,
+                                                                                                  String categorySlug, String subCategorySlug, String productSlug,
                                                                                                   Boolean inStock, Boolean isFeatured, String processor,
                                                                                                   String battery, String ram,
                                                                                                   String rom, String screenSize, String backCamera, String frontCamera,
@@ -31,7 +31,7 @@ public class ShopProductController {
                                                                                                   @RequestParam(defaultValue = "0") int pageNo,
                                                                                                   @RequestParam(required = false) Integer rating ){
 
-        return shopProductService.getProducts(productName, brand, categoryId, subCategoryId, productSlug, inStock,
+        return shopProductService.getProducts(productName, brand, categorySlug, subCategorySlug, productSlug, inStock,
                 isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera, sortBy, orderBy,
                 pageSize, pageNo, rating );
     }

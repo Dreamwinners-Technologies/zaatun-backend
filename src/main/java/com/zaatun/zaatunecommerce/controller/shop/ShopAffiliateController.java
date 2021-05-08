@@ -2,6 +2,7 @@ package com.zaatun.zaatunecommerce.controller.shop;
 
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopAffiliateUserResponse;
 import com.zaatun.zaatunecommerce.service.shop.ShopAffiliateService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/store/affiliate")
 public class ShopAffiliateController {
     private final ShopAffiliateService shopAffiliateService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<ShopAffiliateUserResponse>> getAffiliateProfile(@RequestHeader(name = "Authorization") String token){
+        return shopAffiliateService.getAffiliateInfo(token);
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<String>> beAffiliate(@RequestHeader(name = "Authorization") String token){

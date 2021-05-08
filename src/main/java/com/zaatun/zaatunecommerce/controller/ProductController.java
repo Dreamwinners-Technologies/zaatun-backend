@@ -1,10 +1,12 @@
 package com.zaatun.zaatunecommerce.controller;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
+import com.zaatun.zaatunecommerce.dto.request.AddAttributesRequest;
 import com.zaatun.zaatunecommerce.dto.request.AddProductRequest;
 import com.zaatun.zaatunecommerce.dto.request.DeleteImageRequest;
 import com.zaatun.zaatunecommerce.dto.request.ProductEditRequest;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
+import com.zaatun.zaatunecommerce.model.ProductAttributesModel;
 import com.zaatun.zaatunecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -18,7 +20,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/dashboard/products/")
+@RequestMapping("/api/dashboard/products")
 public class ProductController {
     private final ProductService productService;
 
@@ -26,6 +28,12 @@ public class ProductController {
     public ResponseEntity<ApiResponse<String>> addProduct(@RequestHeader(name = "Authorization") String token,
                                                           @Valid @RequestBody AddProductRequest addProductRequest){
         return productService.addProduct(token, addProductRequest);
+    }
+
+    @PostMapping("/productAttributes")
+    public ResponseEntity<ApiResponse<ProductAttributesModel>> addProductAttributes(@RequestHeader(name = "Authorization") String token,
+                                                                                    @Valid @RequestBody AddAttributesRequest addAttributesRequest){
+        return productService.addProductAttributes(token, addAttributesRequest);
     }
 
     @GetMapping

@@ -1,15 +1,11 @@
 package com.zaatun.zaatunecommerce.model;
 
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 
@@ -53,16 +49,6 @@ public class ProductModel {
     @ManyToOne(cascade = CascadeType.ALL)
     private SubCategoryModel subCategoryModel;
 
-    @Column(nullable = false)
-    private Integer buyingPrice;
-
-    @Min(1)
-    @Column(nullable = false)
-    private Integer regularPrice;
-
-    @Column(nullable = false)
-    private Integer discountPrice;
-
     @Column(columnDefinition="TEXT")
     private String description;
 
@@ -88,8 +74,6 @@ public class ProductModel {
 
     private Long totalSold;
 
-    private Integer quantity;
-
     private String deliveryInfo;
 
     private String key;
@@ -111,4 +95,10 @@ public class ProductModel {
     @CollectionTable
     @ElementCollection
     private List<String> productImages;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<ProductAttributesModel> productAttributeModels;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<ProductVariationModel> variations;
 }

@@ -1,5 +1,7 @@
 package com.zaatun.zaatunecommerce.dto.request;
 
+import com.zaatun.zaatunecommerce.model.ProductAttributesModel;
+import com.zaatun.zaatunecommerce.model.ProductVariationModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -61,9 +63,17 @@ public class ProductEditRequest {
 
     private Double vat;
 
-    private Integer quantity;
+//    private Integer quantity;
 
     private String deliveryInfo;
 
+    private String key;
+
+    private String value;
+
     private AddSpecificationRequest addSpecification;
+
+    private List<ProductAttributesModel> productAttributeModels;
+
+    private List<ProductVariationModel> variations;
 }

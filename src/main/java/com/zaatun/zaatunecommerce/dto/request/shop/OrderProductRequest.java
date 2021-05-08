@@ -16,4 +16,6 @@ public class OrderProductRequest {
     @Positive(message = "Quantity can't be less than 1")
     private Integer quantity;
 
+    private Long variationId;
+
 }

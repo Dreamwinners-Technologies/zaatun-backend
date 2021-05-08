@@ -1,5 +1,6 @@
 package com.zaatun.zaatunecommerce.dto.request;
 
+import com.zaatun.zaatunecommerce.model.ProductAttributesModel;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -30,18 +31,6 @@ public class AddProductRequest {
 
     private String subCategoryId;
 
-    @Min(0)
-    @Column(nullable = false)
-    private Integer buyingPrice;
-
-    @Min(1)
-    @Column(nullable = false)
-    private Integer regularPrice;
-
-    @Min(0)
-    @Column(nullable = false)
-    private Integer discountPrice;
-
     private String description;
 
     private String shortDescription;
@@ -62,8 +51,6 @@ public class AddProductRequest {
 
     private Double vat;
 
-    private Integer quantity;
-
     private String deliveryInfo;
 
     private String key;
@@ -71,5 +58,9 @@ public class AddProductRequest {
     private String value;
 
     private AddSpecificationRequest addSpecification;
+
+    private List<ProductAttributesModel> productAttributeModels;
+
+    private List<AddVariationRequest> variations;
 
 }

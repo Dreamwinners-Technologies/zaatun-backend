@@ -23,6 +23,7 @@ public class ShopOrderServiceExtended {
     private final CouponRepository couponRepository;
     private final AffiliateUserTrackerRepository affiliateUserTrackerRepository;
     private final AffiliateUserRepository affiliateUserRepository;
+    private final ProductVariationRepository productVariationRepository;
 
     Optional<DeliveryAddressModel> getDeliveryAddress(ProfileModel profileModel, Long deliveryAddressId) {
         List<DeliveryAddressModel> deliveryAddressModelList = profileModel.getDeliveryAddresses();
@@ -68,16 +69,16 @@ public class ShopOrderServiceExtended {
     }
 
     //calculating the total price of products
-    public Integer getTotalProductPrice(List<ProductModel> productModels, List<OrderProductRequest> orderProductList) {
+    public Integer getTotalProductPrice(List<ProductVariationModel> variationModels, List<OrderProductRequest> orderProductList) {
 
         Integer totalProductPrice = 0;
 
-        for (ProductModel productModel : productModels) {
-            Integer regularPrice = productModel.getRegularPrice();
-            Integer discountPrice = productModel.getDiscountPrice();
+        for (ProductVariationModel productVariationModel : variationModels) {
+
+            Integer regularPrice = productVariationModel.getRegularPrice();
+            Integer discountPrice = productVariationModel.getDiscountPrice();
 
             Integer productPrice;
-
             if (discountPrice != 0 && discountPrice < regularPrice) {
                 productPrice = discountPrice;
             } else {
@@ -87,20 +88,20 @@ public class ShopOrderServiceExtended {
             Integer quantity = 0;
 
             for (OrderProductRequest productRequest : orderProductList) {
-                if (productModel.getProductSlug().equals(productRequest.getProductSlug())) {
-                    if (productModel.getQuantity() >= productRequest.getQuantity()) {
+                if (productVariationModel.getProductModel().getProductSlug().equals(productRequest.getProductSlug())) {
+                    if (productVariationModel.getStock() >= productRequest.getQuantity()) {
                         quantity = productRequest.getQuantity();
                         break;
                     } else {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Not enough quantity of product: " + productModel.getProductName());
+                                "Not enough quantity of product: " + productVariationModel.getProductModel().getProductName());
                     }
                 }
             }
 
             if (quantity == 0) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "There is a problem on product price " +
-                        "calculation, with slug: " + productModel.getProductSlug());
+                        "calculation, with slug: " + productVariationModel.getProductModel().getProductSlug());
             } else {
                 totalProductPrice += productPrice * quantity;
             }
@@ -108,6 +109,23 @@ public class ShopOrderServiceExtended {
         }
 
         return totalProductPrice;
+    }
+
+
+    private ProductVariationModel getProductVariationModel(ProductModel productModel, OrderProductRequest productRequest) {
+        ProductVariationModel productVariationModel = null;
+
+        for (ProductVariationModel productVariation : productModel.getVariations()) {
+            if (productVariation.getId().equals((long) productRequest.getVariationId())) {
+                productVariationModel = productVariation;
+                break;
+            }
+        }
+
+        if (productVariationModel == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Variation Not Matched");
+        }
+        return productVariationModel;
     }
 
     public CouponModel getCouponDiscount(Integer totalPrice, String couponCode) {
@@ -135,50 +153,79 @@ public class ShopOrderServiceExtended {
         }
     }
 
-    //Migrate ProductModel to OrderProductModel and reduce product stock
-    public List<OrderProductModel> fromProductsToOrderProducts(List<ProductModel> productModels,
-                                                               List<OrderProductRequest> orderProductList, String userName) {
+    public List<OrderProductModel> reduceStock(OrderPlaceRequest orderPlaceRequest, List<ProductVariationModel> productVariationModels, String username) {
 
         List<OrderProductModel> orderProductModels = new ArrayList<>();
-        for (ProductModel productModel : productModels) {        //Iterate over ProductModels
+        for (ProductVariationModel productVariationModel : productVariationModels) {
 
-            for (OrderProductRequest productRequest : orderProductList) {   //Iterate over OrderProductRequest
+            for (OrderProductRequest productRequest : orderPlaceRequest.getProducts()) {
+                ProductModel productModel = productVariationModel.getProductModel();
 
-                //Checking if current productModel equals orderProduct
-                if (productModel.getProductSlug().equals(productRequest.getProductSlug())) {
-                    if (productModel.getQuantity() >= productRequest.getQuantity()) {       //Checking if productModel have enough quantity
-                        productModel.setQuantity(productModel.getQuantity() - productRequest.getQuantity());    //Reduce Stock
+                if (productVariationModel.getStock() >= productRequest.getQuantity()) {       //Checking if productModel have enough quantity
+                    productVariationModel.setStock(productVariationModel.getStock() - productRequest.getQuantity());    //Reduce Stock
 
-                        if (productModel.getQuantity() == 0) {    //Check if quantity is zero
-                            productModel.setInStock(false);     //Setting stock to false
-                        }
-                        productModel.setTotalSold(productModel.getTotalSold() + 1);       //Increasing total sold
-
-                        //Adding new buyersId to product
-                        Set<String> buyersId = productModel.getBuyersId();
-                        buyersId.add(userName);
-
-                        productModel.setBuyersId(buyersId);
-
-                        //Migrating ProductModel to OrderProductModel
-                        OrderProductModel orderProductModel = productToOrderProduct(productModel);
-                        orderProductModels.add(orderProductModel);      //Adding to list
-
-                        break;
-                    } else {
-                        //InCase Short Stock
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Not enough quantity of product: " + productModel.getProductName());
+                    if (productVariationModel.getStock() == 0) {    //Check if quantity is zero
+                        productVariationModel.setInStock(false);     //Setting stock to false
                     }
+
+                    productModel.setInStock(false);
+                    for (ProductVariationModel variationModel : productModel.getVariations()) {
+                        if (variationModel.getInStock()) {
+                            productModel.setInStock(true);
+                        }
+                    }
+
+                    productModel.setTotalSold(productModel.getTotalSold() + 1);       //Increasing total sold
+
+                    //Adding new buyersId to product
+                    Set<String> buyersId = productModel.getBuyersId();
+                    buyersId.add(username);
+
+                    productModel.setBuyersId(buyersId);
+
+                    OrderProductModel orderProductModel = productToOrderProduct(productModel, productRequest, productVariationModel);
+                    orderProductModels.add(orderProductModel);
+
+                    break;
+                } else {
+                    //InCase Short Stock
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Not enough quantity of product: " + productModel.getProductName());
                 }
             }
+
         }
 
         return orderProductModels;
     }
 
+
     //Migrating ProductModel to OrderProductModel
-    private OrderProductModel productToOrderProduct(ProductModel productModel) {
+    private OrderProductModel productToOrderProduct(ProductModel productModel, OrderProductRequest productRequest,
+                                                    ProductVariationModel productVariationModel) {
+
+        StringBuilder variation = new StringBuilder();
+        for (ProductAttributesModel productAttributesModel : productModel.getProductAttributeModels()) {
+            for (ProductAttribute productAttribute : productAttributesModel.getAttributes()) {
+                for (Long vId : productVariationModel.getAttributeCombinations()) {
+                    if (productAttribute.getId().equals(vId)) {
+                        variation.append(productAttribute.getValue()).append(" ");
+                    }
+                }
+            }
+
+        }
+
+        Integer regularPrice = productVariationModel.getRegularPrice();
+        Integer discountPrice = productVariationModel.getDiscountPrice();
+
+        Integer productPrice;
+        if (discountPrice != 0 && discountPrice < regularPrice) {
+            productPrice = discountPrice;
+        } else {
+            productPrice = regularPrice;
+        }
+
         OrderProductModel orderProductModel = new OrderProductModel();
         orderProductModel.setProductName(productModel.getProductName());
         orderProductModel.setProductSlug(productModel.getProductSlug());
@@ -186,12 +233,12 @@ public class ShopOrderServiceExtended {
         orderProductModel.setBrand(productModel.getBrand());
         orderProductModel.setCategoryName(productModel.getCategoryModel().getCategoryName());
         orderProductModel.setSubCategoryName(productModel.getSubCategoryModel().getSubCategoryName());
-        orderProductModel.setRegularPrice(productModel.getRegularPrice());
-        orderProductModel.setDiscountPrice(productModel.getDiscountPrice());
         orderProductModel.setShortDescription(productModel.getShortDescription());
         orderProductModel.setDeliveryInfo(productModel.getDeliveryInfo());
         orderProductModel.setProductImages(productModel.getProductImages());
-        orderProductModel.setQuantity(productModel.getQuantity());
+        orderProductModel.setQuantity(productRequest.getQuantity());
+        orderProductModel.setVariation(variation.toString());
+        orderProductModel.setPrice(productPrice);
 
         return orderProductModel;
     }
@@ -215,14 +262,14 @@ public class ShopOrderServiceExtended {
                     if (affiliateUserModel.getProfileModel().getIsAffiliate()) {    //After matching, Getting the affiliate details
                         //Calculate the affiliate amount
                         Double affiliatePercentage = productModel.getAffiliatePercentage();
-                        Integer affiliateAmount = (int) (productModel.getRegularPrice() * affiliatePercentage / 100);
+                        Integer affiliateAmount = (int) (productModel.getVariations().get(0).getRegularPrice() * affiliatePercentage / 100);
 
                         //Setting the data to affiliate user
                         Integer tempBalance = affiliateUserModel.getAffiliateBalance();
                         affiliateUserModel.setAffiliateBalance(tempBalance + affiliateAmount);
                         affiliateUserModel.setCompletedAffiliateProducts(
                                 affiliateUserModel.getCompletedAffiliateProducts() + 1);
-                        affiliateUserModel.setTotalSold(affiliateUserModel.getTotalSold() + productModel.getRegularPrice());
+                        affiliateUserModel.setTotalSold(affiliateUserModel.getTotalSold() + productModel.getVariations().get(0).getRegularPrice());
 
                         affiliateUserRepository.save(affiliateUserModel);
                         affiliateUserTrackerRepository.delete(userTrackerModel);    //Delete the affiliate refer tracking info
@@ -234,3 +281,142 @@ public class ShopOrderServiceExtended {
         }
     }
 }
+
+//    public Integer getTotalProductPrice(List<ProductModel> productModels, List<OrderProductRequest> orderProductList) {
+//
+//        Integer totalProductPrice = 0;
+//
+//        for (ProductModel productModel : productModels) {
+////            Integer regularPrice = productModel.getRegularPrice();
+////            Integer discountPrice = productModel.getDiscountPrice();
+//
+//
+//            Integer regularPrice = 0;
+//            Integer discountPrice = 0;
+//
+//            Integer productPrice;
+//
+//
+//            Integer quantity = 0;
+//
+//            for (OrderProductRequest productRequest : orderProductList) {
+//                if (productModel.getProductSlug().equals(productRequest.getProductSlug())) {
+//
+//                    ProductVariationModel productVariationModel = getProductVariationModel(productModel, productRequest);
+//
+//                    if (productVariationModel.getStock() >= productRequest.getQuantity()) {
+//                        quantity = productRequest.getQuantity();
+//                        regularPrice = productVariationModel.getRegularPrice();
+//                        discountPrice = productVariationModel.getDiscountPrice();
+//                        break;
+//                    } else {
+//                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                                "Not enough quantity of product: " + productModel.getProductName());
+//                    }
+//
+//                }
+//            }
+//
+//            if (discountPrice != 0 && discountPrice < regularPrice) {
+//                productPrice = discountPrice;
+//            } else {
+//                productPrice = regularPrice;
+//            }
+//
+//            if (quantity == 0) {
+//                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "There is a problem on product price " +
+//                        "calculation, with slug: " + productModel.getProductSlug());
+//            } else {
+//                totalProductPrice += productPrice * quantity;
+//            }
+//
+//        }
+//
+//        return totalProductPrice;
+//    }
+
+
+    //Migrating ProductModel to OrderProductModel
+//    private OrderProductModel productToOrderProduct(ProductModel productModel, OrderProductRequest productRequest) {
+//
+//        ProductVariationModel productVariationModel = getProductVariationModel(productModel, productRequest);
+//
+//        StringBuilder variation = new StringBuilder();
+//        for (ProductAttributesModel productAttributesModel : productModel.getProductAttributeModels()) {
+//            for (ProductAttribute productAttribute : productAttributesModel.getAttributes()) {
+//                for (Integer vId : productVariationModel.getAttributeCombinations()) {
+//                    if (productAttribute.getId().equals((long) vId)) {
+//                        variation.append(productAttribute.getValue()).append(" ");
+//                    }
+//                }
+//            }
+//
+//        }
+//
+//        OrderProductModel orderProductModel = new OrderProductModel();
+//        orderProductModel.setProductName(productModel.getProductName());
+//        orderProductModel.setProductSlug(productModel.getProductSlug());
+//        orderProductModel.setSKU(productModel.getSKU());
+//        orderProductModel.setBrand(productModel.getBrand());
+//        orderProductModel.setCategoryName(productModel.getCategoryModel().getCategoryName());
+//        orderProductModel.setSubCategoryName(productModel.getSubCategoryModel().getSubCategoryName());
+//        orderProductModel.setShortDescription(productModel.getShortDescription());
+//        orderProductModel.setDeliveryInfo(productModel.getDeliveryInfo());
+//        orderProductModel.setProductImages(productModel.getProductImages());
+//        orderProductModel.setQuantity(productRequest.getQuantity());
+//        orderProductModel.setVariation(variation.toString());
+//
+//        return orderProductModel;
+//    }
+
+    //Migrate ProductModel to OrderProductModel and reduce product stock
+//    public List<OrderProductModel> fromProductsToOrderProducts(List<ProductModel> productModels,
+//                                                               List<OrderProductRequest> orderProductList, String userName) {
+//
+//        List<OrderProductModel> orderProductModels = new ArrayList<>();
+//        for (ProductModel productModel : productModels) {        //Iterate over ProductModels
+//
+//            for (OrderProductRequest productRequest : orderProductList) {   //Iterate over OrderProductRequest
+//
+//                //Checking if current productModel equals orderProduct
+//                if (productModel.getProductSlug().equals(productRequest.getProductSlug())) {
+//
+//                    ProductVariationModel productVariationModel = getProductVariationModel(productModel, productRequest);
+//
+//                    if (productVariationModel.getStock() >= productRequest.getQuantity()) {       //Checking if productModel have enough quantity
+//                        productVariationModel.setStock(productVariationModel.getStock() - productRequest.getQuantity());    //Reduce Stock
+//
+//                        if (productVariationModel.getStock() == 0) {    //Check if quantity is zero
+//                            productVariationModel.setInStock(false);     //Setting stock to false
+//                        }
+//                        productModel.setInStock(false);
+//                        for (ProductVariationModel variationModel : productModel.getVariations()) {
+//                            if (variationModel.getInStock()) {
+//                                productModel.setInStock(true);
+//                            }
+//                        }
+//
+//                        productModel.setTotalSold(productModel.getTotalSold() + 1);       //Increasing total sold
+//
+//                        //Adding new buyersId to product
+//                        Set<String> buyersId = productModel.getBuyersId();
+//                        buyersId.add(userName);
+//
+//                        productModel.setBuyersId(buyersId);
+//
+//                        //Migrating ProductModel to OrderProductModel
+//                        OrderProductModel orderProductModel = productToOrderProduct(productModel, productRequest);
+//                        orderProductModels.add(orderProductModel);      //Adding to list
+//
+//                        break;
+//                    } else {
+//                        //InCase Short Stock
+//                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                                "Not enough quantity of product: " + productModel.getProductName());
+//                    }
+//                }
+//            }
+//        }
+//
+//        return orderProductModels;
+//    }

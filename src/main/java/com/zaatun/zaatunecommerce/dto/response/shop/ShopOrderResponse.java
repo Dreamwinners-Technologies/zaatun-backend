@@ -1,6 +1,7 @@
 package com.zaatun.zaatunecommerce.dto.response.shop;
 
 import com.zaatun.zaatunecommerce.model.DeliveryAddressModel;
+import com.zaatun.zaatunecommerce.model.OrderProductModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class ShopOrderResponse {
 
     private String userName;
 
-    private List<ShopOrderProductResponse> orderItems;
+    private List<OrderProductModel> orderItems;
 
     private DeliveryAddressModel deliveryAddress;
 

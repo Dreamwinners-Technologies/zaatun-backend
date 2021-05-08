@@ -30,7 +30,7 @@ public class ShopProductService {
 
     //Get All products with filtering options for Store
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>>
-    getProducts(String productName, String brand, String categoryId, String subCategoryId,
+    getProducts(String productName, String brand, String categorySlug, String subCategorySlug,
                 String productSlug, Boolean inStock, Boolean isFeatured, String processor,
                 String battery, String ram, String rom, String screenSize, String backCamera,
                 String frontCamera, String sortBy, Sort.Direction orderBy, int pageSize,
@@ -52,8 +52,8 @@ public class ShopProductService {
                 .productSlug(productSlug)
                 .productName(productName)
                 .brand(brand)
-                .categoryModel(CategoryModel.builder().categoryId(categoryId).build())
-                .subCategoryModel(SubCategoryModel.builder().subCategoryId(subCategoryId).build())
+                .categoryModel(CategoryModel.builder().categorySlug(categorySlug).build())
+                .subCategoryModel(SubCategoryModel.builder().subCategoryId(subCategorySlug).build())
                 .inStock(inStock)
                 .isFeatured(isFeatured)
                 .specification(exSpecification)
