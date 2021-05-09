@@ -11,7 +11,7 @@ spring:
   jpa:
     generate-ddl: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   liquibase:
     change-log: "classpath:/db.changelog/db.changelog-master.yml"
     enabled: true
