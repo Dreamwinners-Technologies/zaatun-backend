@@ -1,8 +1,10 @@
 package com.zaatun.zaatunecommerce.controller.shop;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
+import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
+import com.zaatun.zaatunecommerce.model.ProductReviewModel;
 import com.zaatun.zaatunecommerce.service.shop.ShopProductService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,26 +22,43 @@ public class ShopProductController {
     private final ShopProductService shopProductService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>> getProducts(@RequestParam(required = false) String productName, String brand,
-                                                                                                  String categorySlug, String subCategorySlug, String productSlug,
-                                                                                                  Boolean inStock, Boolean isFeatured, String processor,
-                                                                                                  String battery, String ram,
-                                                                                                  String rom, String screenSize, String backCamera, String frontCamera,
-                                                                                                  @RequestParam(defaultValue = "createdOn") String sortBy,
-                                                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction orderBy,
-                                                                                                  @RequestParam(defaultValue = "50") int pageSize,
-                                                                                                  @RequestParam(defaultValue = "0") int pageNo,
-                                                                                                  @RequestParam(required = false) Integer rating ){
+    public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>> getProducts(
+            @RequestParam(required = false) String productName, String brand,
+            String categorySlug, String subCategorySlug, String productSlug,
+            Boolean inStock, Boolean isFeatured, String processor,
+            String battery, String ram,
+            String rom, String screenSize, String backCamera, String frontCamera,
+            @RequestParam(defaultValue = "createdOn") String sortBy,
+            @RequestParam(defaultValue = "ASC") Sort.Direction orderBy,
+            @RequestParam(defaultValue = "50") int pageSize,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(required = false) Integer rating,
+            @RequestHeader(name = "Authorization", required = false) String token) {
 
         return shopProductService.getProducts(productName, brand, categorySlug, subCategorySlug, productSlug, inStock,
                 isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera, sortBy, orderBy,
-                pageSize, pageNo, rating );
+                pageSize, pageNo, rating, token);
     }
 
     @GetMapping("/{productSlug}")
-    public ResponseEntity<ApiResponse<ShopProductResponse>> getProductBySlug(@PathVariable String productSlug,
-                                                                             @RequestParam(required = false) String affiliateUserSlug){
+    public ResponseEntity<ApiResponse<ShopProductResponse>> getProductBySlug(
+            @PathVariable String productSlug,
+            @RequestParam(required = false) String affiliateUserSlug,
+            @RequestHeader(name = "Authorization", required = false) String token) {
 
-        return shopProductService.getProductBySlug(productSlug, affiliateUserSlug);
+        return shopProductService.getProductBySlug(productSlug, affiliateUserSlug, token);
     }
+
+    @PostMapping("/{productSlug}/review")
+    public ResponseEntity<ApiResponse<String>> addReview(@RequestHeader(name = "Authorization") String token,
+                                                         @PathVariable String productSlug,
+                                                         @RequestBody AddReviewRequest addReviewRequest) {
+        return shopProductService.addReview(token, productSlug, addReviewRequest);
+    }
+
+    @GetMapping("/{productSlug}/review")
+    public ResponseEntity<ApiResponse<List<ProductReviewModel>>> getReviewList(@PathVariable String productSlug) {
+        return shopProductService.getReviewList(productSlug);
+    }
+
 }

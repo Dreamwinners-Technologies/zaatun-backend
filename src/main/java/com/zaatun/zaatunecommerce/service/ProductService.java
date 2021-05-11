@@ -3,12 +3,10 @@ package com.zaatun.zaatunecommerce.service;
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.*;
+import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
 import com.zaatun.zaatunecommerce.model.*;
-import com.zaatun.zaatunecommerce.repository.CategoryRepository;
-import com.zaatun.zaatunecommerce.repository.ProductAttributesModelRepository;
-import com.zaatun.zaatunecommerce.repository.ProductRepository;
-import com.zaatun.zaatunecommerce.repository.SubCategoryRepository;
+import com.zaatun.zaatunecommerce.repository.*;
 import lombok.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -96,7 +94,7 @@ public class ProductService {
 
 
             List<ProductVariationModel> productVariationModels = new ArrayList<>();
-            for (AddVariationRequest addVariationRequest: addProductRequest.getVariations()){
+            for (AddVariationRequest addVariationRequest : addProductRequest.getVariations()) {
                 ProductVariationModel productVariationModel = new ProductVariationModel(0L, addVariationRequest.getStock(),
                         addVariationRequest.getInStock(), addVariationRequest.getIsDefault(), addVariationRequest.getBuyingPrice(),
                         addVariationRequest.getRegularPrice(), addVariationRequest.getDiscountPrice(),
@@ -217,11 +215,10 @@ public class ProductService {
                 productModel.setProductAttributeModels(productEditRequest.getProductAttributeModels());
 
                 List<ProductVariationModel> productVariationModels = new ArrayList<>();
-                for (ProductVariationModel productVariationModel: productEditRequest.getVariations()){
-                    if(productVariationModel.getId() != null){
+                for (ProductVariationModel productVariationModel : productEditRequest.getVariations()) {
+                    if (productVariationModel.getId() != null) {
                         productVariationModels.add(productVariationModel);
-                    }
-                    else {
+                    } else {
                         ProductVariationModel newProductVariationModel = new ProductVariationModel(0L, productVariationModel.getStock(),
                                 productVariationModel.getInStock(), productVariationModel.getIsDefault(),
                                 productVariationModel.getBuyingPrice(), productVariationModel.getRegularPrice(),
@@ -280,7 +277,7 @@ public class ProductService {
     }
 
     public ResponseEntity<ApiResponse<String>> deleteProductImages(String token, String productId,
-                                                                         DeleteImageRequest deleteImageRequest) {
+                                                                   DeleteImageRequest deleteImageRequest) {
         Optional<ProductModel> productModelOptional = productRepository.findById(productId);
 
         if (productModelOptional.isPresent()) {
@@ -293,10 +290,9 @@ public class ProductService {
 
             List<String> imageLinks = productModel.getProductImages();
 
-            if(imageLinks.contains(deleteImageRequest.getImageLink())){
+            if (imageLinks.contains(deleteImageRequest.getImageLink())) {
                 imageLinks.remove(deleteImageRequest.getImageLink());
-            }
-            else {
+            } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image link is not matched with product");
             }
 
@@ -312,7 +308,7 @@ public class ProductService {
 
         List<ProductAttribute> productAttributeList = new ArrayList<>();
 
-        for (String attribute: addAttributesRequest.getValues()){
+        for (String attribute : addAttributesRequest.getValues()) {
             ProductAttribute productAttribute = new ProductAttribute(0L, attribute);
             productAttributeList.add(productAttribute);
         }
@@ -324,4 +320,6 @@ public class ProductService {
 
         return new ResponseEntity<>(new ApiResponse<>(201, "Attributes Created", productAttributesModel), HttpStatus.CREATED);
     }
+
+
 }

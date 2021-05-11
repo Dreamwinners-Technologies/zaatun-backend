@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -52,9 +53,9 @@ public class ShopProductResponse {
 
     private List<String> productImages;
 
-    private List<ProductReviewModel> productReviews;
+//    private List<ProductReviewModel> productReviews;
 
-    private Set<String> buyersId;
+//    private Set<String> buyersId;
 
     private SpecificationModel specification;
 
@@ -63,5 +64,9 @@ public class ShopProductResponse {
     private List<ProductAttributesModel> attributes;
 
     private List<ShopVariationResponse> variations;
+
+    private Boolean isReviewable;
+
+    private Double reviewStar;
 
 }

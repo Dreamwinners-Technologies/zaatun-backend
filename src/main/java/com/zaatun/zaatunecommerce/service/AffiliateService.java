@@ -103,7 +103,7 @@ public class AffiliateService {
         Page<ProfileModel> profileModelPage = profileRepository.findAll(Example.of(exampleProfile, matcher), pageable);
 
         PaginationResponse<List<ProfileModel>> paginationResponse = new PaginationResponse<>(pageSize, pageNo,
-                profileModelPage.getSize(), profileModelPage.isLast(), profileModelPage.getTotalElements(),
+                profileModelPage.getContent().size(), profileModelPage.isLast(), profileModelPage.getTotalElements(),
                 profileModelPage.getTotalPages(), profileModelPage.getContent());
 
 //        System.out.println(paginationResponse.getData().get(0).getName());
@@ -161,7 +161,7 @@ public class AffiliateService {
         }
 
         PaginationResponse<List<AffiliateWithdrawResponse>> paginationResponse = new PaginationResponse<>(pageSize, pageNo,
-                affiliateWithdrawPage.getSize(), affiliateWithdrawPage.isLast(), affiliateWithdrawPage.getTotalElements(),
+                affiliateWithdrawPage.getContent().size(), affiliateWithdrawPage.isLast(), affiliateWithdrawPage.getTotalElements(),
                 affiliateWithdrawPage.getTotalPages(), affiliateRequests);
 
         if (affiliateWithdrawPage.isEmpty()) {

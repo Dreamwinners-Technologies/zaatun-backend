@@ -99,6 +99,6 @@ public class ProductModel {
     @OneToMany(cascade = CascadeType.ALL)
     private List<ProductAttributesModel> productAttributeModels;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private List<ProductVariationModel> variations;
 }

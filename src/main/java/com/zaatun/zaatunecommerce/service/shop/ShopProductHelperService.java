@@ -16,14 +16,15 @@ public class ShopProductHelperService {
     private final ProductRepository productRepository;
 
     //Migration from ProductModel List to ShopProductResponse List for Store.
-    public List<ShopProductResponse> shopProductResponseFromProductsDb(List<ProductModel> productModels) {
+    public List<ShopProductResponse> shopProductResponseFromProductsDb(List<ProductModel> productModels, String userId) {
+
         //New ArrayList of ShopProductResponse
         List<ShopProductResponse> shopProductResponses = new ArrayList<>();
 
         //Iterating the ProductModel and migrating to shopProductResponse then add to the ArrayList
         for (ProductModel productModel : productModels) {
 
-            ShopProductResponse shopProductResponse = migrateProductModelToShopProductResponse(productModel);
+            ShopProductResponse shopProductResponse = migrateProductModelToShopProductResponse(productModel, userId);
 
             //Adding the ShopProductResponse to the list
             shopProductResponses.add(shopProductResponse);
@@ -33,7 +34,7 @@ public class ShopProductHelperService {
         return shopProductResponses;
     }
 
-    public ShopProductResponse migrateProductModelToShopProductResponse(ProductModel productModel) {
+    public ShopProductResponse migrateProductModelToShopProductResponse(ProductModel productModel, String userId) {
         //Getting the CategoryModel from the ProductModel
         CategoryModel categoryModel = productModel.getCategoryModel();
 
@@ -62,15 +63,30 @@ public class ShopProductHelperService {
             shopVariationResponses.add(shopVariationResponse);
         }
 
+        //Checking if the user can give review or not
+        boolean isReviewAvailable = false;
+        if(userId != null && productModel.getBuyersId().contains(userId)){
+            isReviewAvailable = true;
+        }
+
+
+        int totalReview = 0;
+        Integer totalReviewStar = 0;
+        for (ProductReviewModel productReviewModel: productModel.getProductReviews()){
+            totalReview++;
+            totalReviewStar += productReviewModel.getReviewStar();
+        }
+        Double reviewStar =  (double)totalReviewStar / (double)totalReview;
+
+
         //Adding Data to ShopProductResponse from ProductModel
         ShopProductResponse shopProductResponse = new ShopProductResponse(productModel.getProductName(),
                 productModel.getProductSlug(), productModel.getProductBadge(), productModel.getSKU(), productModel.getBrand(), shopCategoryResponse,
                 shopSubCategoryResponse, productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
                 productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
                 productModel.getIsDiscount(), productModel.getVideoUrl(), productModel.getVat(),
-                productModel.getProductImages(), productModel.getProductReviews(),
-                productModel.getBuyersId(), productModel.getSpecification(), null, productModel.getProductAttributeModels(),
-                shopVariationResponses);
+                productModel.getProductImages(), productModel.getSpecification(), null, productModel.getProductAttributeModels(),
+                shopVariationResponses, isReviewAvailable, reviewStar);
         return shopProductResponse;
     }
 

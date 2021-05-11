@@ -1,6 +1,8 @@
 package com.zaatun.zaatunecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.engine.internal.Cascade;
 
 import javax.persistence.*;
 
@@ -17,6 +19,8 @@ public class ProductReviewModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long reviewId;
 
+    private Long createdOn;
+
     private String reviewerUserName;
 
     private String reviewerName;
@@ -24,4 +28,8 @@ public class ProductReviewModel {
     private Integer reviewStar;
 
     private String comment;
+
+    @JsonIgnore
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    private ProductModel productModel;
 }

@@ -5,8 +5,11 @@ import com.zaatun.zaatunecommerce.dto.request.AddAttributesRequest;
 import com.zaatun.zaatunecommerce.dto.request.AddProductRequest;
 import com.zaatun.zaatunecommerce.dto.request.DeleteImageRequest;
 import com.zaatun.zaatunecommerce.dto.request.ProductEditRequest;
+import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.ProductResponse;
 import com.zaatun.zaatunecommerce.model.ProductAttributesModel;
+import com.zaatun.zaatunecommerce.model.ProductReviewModel;
+import com.zaatun.zaatunecommerce.service.ProductReviewService;
 import com.zaatun.zaatunecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -23,6 +26,7 @@ import java.util.List;
 @RequestMapping("/api/dashboard/products")
 public class ProductController {
     private final ProductService productService;
+    private final ProductReviewService productReviewService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<String>> addProduct(@RequestHeader(name = "Authorization") String token,
@@ -74,6 +78,19 @@ public class ProductController {
                                                                          @PathVariable String productId,
                                                                          @RequestBody DeleteImageRequest deleteImageRequest){
         return productService.deleteProductImages(token, productId, deleteImageRequest);
+    }
+
+    @GetMapping("/review")
+    public ResponseEntity<ApiResponse<PaginationResponse<List<ProductReviewModel>>>>  getAllReviews(@RequestParam(defaultValue = "50") int pageSize,
+                                                                                                    @RequestParam(defaultValue = "0") int pageNo,
+                                                                                                    @RequestParam(required = false) String productSlug,
+                                                                                                    @RequestParam(required = false) String reviewBy){
+        return productReviewService.getAllReview(pageSize, pageNo, productSlug, reviewBy);
+    }
+
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponse<String>> deleteReview(@PathVariable Long reviewId){
+        return productReviewService.deleteReview(reviewId);
     }
 }
 

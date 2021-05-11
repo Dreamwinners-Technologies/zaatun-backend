@@ -1,12 +1,15 @@
 package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
+import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
+import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.AffiliateUserRepository;
 import com.zaatun.zaatunecommerce.repository.AffiliateUserTrackerRepository;
 import com.zaatun.zaatunecommerce.repository.ProductRepository;
+import com.zaatun.zaatunecommerce.repository.ProfileRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,8 @@ public class ShopProductService {
     private final ShopProductHelperService shopProductHelperService;
     private final AffiliateUserRepository affiliateUserRepository;
     private final AffiliateUserTrackerRepository affiliateUserTrackerRepository;
+    private final JwtProvider jwtProvider;
+    private final ProfileRepository profileRepository;
 
     //Get All products with filtering options for Store
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponse>>>>
@@ -34,7 +39,9 @@ public class ShopProductService {
                 String productSlug, Boolean inStock, Boolean isFeatured, String processor,
                 String battery, String ram, String rom, String screenSize, String backCamera,
                 String frontCamera, String sortBy, Sort.Direction orderBy, int pageSize,
-                int pageNo, Integer rating) {
+                int pageNo, Integer rating, String token) {
+
+        String userId = getUserId(token);
 
         //Example Specification for filtering
         SpecificationModel exSpecification = SpecificationModel.builder()
@@ -78,7 +85,8 @@ public class ShopProductService {
         List<ProductModel> productModels = productModelPage.getContent();
 
         //Migration from ProductModel List to ShopProductResponse List for Store.
-        List<ShopProductResponse> shopProductResponses = shopProductHelperService.shopProductResponseFromProductsDb(productModels);
+        List<ShopProductResponse> shopProductResponses =
+                shopProductHelperService.shopProductResponseFromProductsDb(productModels, userId);
 
         //Setting custom pagination info with the list of productResponse list
         PaginationResponse<List<ShopProductResponse>> paginationResponse = new PaginationResponse<>(pageSize, pageNo,
@@ -95,20 +103,23 @@ public class ShopProductService {
     }
 
 
-    public ResponseEntity<ApiResponse<ShopProductResponse>> getProductBySlug(String productSlug, String affiliateUserSlug) {
+    public ResponseEntity<ApiResponse<ShopProductResponse>> getProductBySlug(String productSlug, String affiliateUserSlug, String token) {
         Optional<ProductModel> productModelOptional = productRepository.findByProductSlug(productSlug);
+
+        String userId = getUserId(token);
 
         if (productModelOptional.isPresent()) {
             ProductModel productModel = productModelOptional.get();
 
-            ShopProductResponse shopProductResponse = shopProductHelperService.migrateProductModelToShopProductResponse(productModel);
+            ShopProductResponse shopProductResponse =
+                    shopProductHelperService.migrateProductModelToShopProductResponse(productModel, userId);
 
             if (affiliateUserSlug != null && !affiliateUserSlug.isEmpty()) {
                 Optional<AffiliateUserModel> affiliateUserModelOptional = affiliateUserRepository.findByAffiliateUserSlug(affiliateUserSlug);
                 if (affiliateUserModelOptional.isPresent()) {
                     AffiliateUserModel affiliateUserModel = affiliateUserModelOptional.get();
 
-                    if(affiliateUserModel.getProfileModel().getIsAffiliate()){
+                    if (affiliateUserModel.getProfileModel().getIsAffiliate()) {
                         String referralId = UUID.randomUUID().toString();
                         AffiliateUserTrackerModel affiliateUserTrackerModel = new AffiliateUserTrackerModel(referralId,
                                 productModel.getProductSlug(), affiliateUserModel);
@@ -127,6 +138,64 @@ public class ShopProductService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product found with slug: " + productSlug);
         }
+    }
+
+    private String getUserId(String token) {
+        String userId = null;
+        String username = jwtProvider.getUserNameFromJwt(token);
+        Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(username);
+        if(profileModelOptional.isPresent()){
+            userId = profileModelOptional.get().getId();
+        }
+        return userId;
+    }
+
+    public ResponseEntity<ApiResponse<String>> addReview(String token, String productSlug, AddReviewRequest addReviewRequest) {
+        String username = jwtProvider.getUserNameFromJwt(token);
+
+        Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(username);
+
+        if (profileModelOptional.isPresent()) {
+            ProfileModel profileModel = profileModelOptional.get();
+
+            Optional<ProductModel> productModelOptional = productRepository.findByProductSlug(productSlug);
+            if (productModelOptional.isPresent()) {
+                ProductModel productModel = productModelOptional.get();
+
+
+                if (!productModel.getBuyersId().contains(profileModel.getId())) {
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You Are Not Permitted to Give Review. First Buy The Product.");
+                }
+
+                List<ProductReviewModel> productReviewModels = productModel.getProductReviews();
+                ProductReviewModel productReviewModel = new ProductReviewModel(0L, System.currentTimeMillis(), username,
+                        profileModel.getName(), addReviewRequest.getReviewStar(), addReviewRequest.getComment(), productModel);
+                productReviewModels.add(productReviewModel);
+
+                productRepository.save(productModel);
+
+                return new ResponseEntity<>(new ApiResponse<>(201, "Comment Created", null), HttpStatus.CREATED);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found with that id.");
+            }
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No User Found");
+        }
+    }
+
+    public ResponseEntity<ApiResponse<List<ProductReviewModel>>> getReviewList(String productSlug) {
+        Optional<ProductModel> productModelOptional = productRepository.findByProductSlug(productSlug);
+        if (productModelOptional.isPresent()) {
+            ProductModel productModel = productModelOptional.get();
+
+            List<ProductReviewModel> productReviewModels = productModel.getProductReviews();
+
+            return new ResponseEntity<>(new ApiResponse<>(200, "Review Found", productReviewModels), HttpStatus.OK);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found with that id.");
+        }
+
     }
 }
 

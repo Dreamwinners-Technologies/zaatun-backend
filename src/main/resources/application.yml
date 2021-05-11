@@ -5,13 +5,13 @@ server:
 
 spring:
   application:
-    name: Dokanee-Backend-Monolithic
+    name: Zaatun-Backend
   profiles:
     active: pgsql
   jpa:
     generate-ddl: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   liquibase:
     change-log: "classpath:/db.changelog/db.changelog-master.yml"
     enabled: true
