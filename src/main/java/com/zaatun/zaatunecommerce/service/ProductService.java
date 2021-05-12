@@ -100,6 +100,7 @@ public class ProductService {
 //                        addVariationRequest.getRegularPrice(), addVariationRequest.getDiscountPrice(),
 //                        addVariationRequest.getAttributeCombinations(), productModel);
 //
+                System.out.println(addProductRequest.toString());
 
                 ProductVariationModel productVariationModel = new ProductVariationModel();
                 productVariationModel.setStock(addVariationRequest.getStock());
@@ -114,7 +115,7 @@ public class ProductService {
             }
 
             productModel.setVariations(productVariationModels);
-
+            System.out.println(productModel.toString());
             productRepository.save(productModel);
 
             return new ResponseEntity<>(new ApiResponse<>(201, "Product Added Successful", basicTableInfo.getId()), HttpStatus.CREATED);
