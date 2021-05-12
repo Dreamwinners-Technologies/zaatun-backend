@@ -95,10 +95,21 @@ public class ProductService {
 
             List<ProductVariationModel> productVariationModels = new ArrayList<>();
             for (AddVariationRequest addVariationRequest : addProductRequest.getVariations()) {
-                ProductVariationModel productVariationModel = new ProductVariationModel(0L, addVariationRequest.getStock(),
-                        addVariationRequest.getInStock(), addVariationRequest.getIsDefault(), addVariationRequest.getBuyingPrice(),
-                        addVariationRequest.getRegularPrice(), addVariationRequest.getDiscountPrice(),
-                        addVariationRequest.getAttributeCombinations(), productModel);
+//                ProductVariationModel productVariationModel = new ProductVariationModel(0L, addVariationRequest.getStock(),
+//                        addVariationRequest.getInStock(), addVariationRequest.getIsDefault(), addVariationRequest.getBuyingPrice(),
+//                        addVariationRequest.getRegularPrice(), addVariationRequest.getDiscountPrice(),
+//                        addVariationRequest.getAttributeCombinations(), productModel);
+//
+
+                ProductVariationModel productVariationModel = new ProductVariationModel();
+                productVariationModel.setStock(addVariationRequest.getStock());
+                productVariationModel.setInStock(addVariationRequest.getInStock());
+                productVariationModel.setIsDefault(addVariationRequest.getIsDefault());
+                productVariationModel.setBuyingPrice(addVariationRequest.getBuyingPrice());
+                productVariationModel.setRegularPrice(addVariationRequest.getRegularPrice());
+                productVariationModel.setAttributeCombinations(addVariationRequest.getAttributeCombinations());
+                productVariationModel.setProductModel(productModel);
+
                 productVariationModels.add(productVariationModel);
             }
 
