@@ -41,7 +41,11 @@ public class ShopProductService {
                 String frontCamera, String sortBy, Sort.Direction orderBy, int pageSize,
                 int pageNo, Integer rating, String token) {
 
-        String userId = getUserId(token);
+        String userId = null;
+        if(token != null && !token.isEmpty()){
+            userId = getUserId(token);
+        }
+
 
         //Example Specification for filtering
         SpecificationModel exSpecification = SpecificationModel.builder()
