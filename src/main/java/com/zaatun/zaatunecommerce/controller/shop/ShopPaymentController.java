@@ -30,21 +30,20 @@ public class ShopPaymentController {
 //    }
 
     @PostMapping("/ipnListener")
-    public ResponseEntity<ApiResponse<String>> ipnListener(@RequestParam String tran_id, @RequestParam String val_id,
-                                                           @RequestParam String amount, @RequestParam String card_type,
-                                                           @RequestParam String store_amount, @RequestParam String card_no,
-                                                           @RequestParam String bank_tran_id, @RequestParam String status,
-                                                           @RequestParam String tran_date, @RequestParam String currency,
-                                                           @RequestParam String card_issuer, @RequestParam String card_brand,
-                                                           @RequestParam String card_issuer_country,
-                                                           @RequestParam String card_issuer_country_code,
-                                                           @RequestParam String store_id, @RequestParam String verify_sign,
-                                                           @RequestParam String verify_key,
-                                                           @RequestParam String currency_type, @RequestParam String currency_amount,
-                                                           @RequestParam String currency_rate, @RequestParam String base_fair,
-                                                           @RequestParam String value_a, @RequestParam String value_b,
-                                                           @RequestParam String value_c,@RequestParam String value_d,
-                                                           @RequestParam String risk_level,@RequestParam String risk_title) throws Exception {
+    public ResponseEntity<ApiResponse<String>> ipnListener(
+            @RequestParam(required = false, defaultValue = "") String tran_id, @RequestParam(required = false, defaultValue = "") String val_id,
+            @RequestParam(required = false, defaultValue = "") String amount, @RequestParam(required = false, defaultValue = "") String card_type,
+            @RequestParam(required = false, defaultValue = "") String store_amount, @RequestParam(required = false, defaultValue = "") String card_no,
+            @RequestParam(required = false, defaultValue = "") String bank_tran_id, @RequestParam(required = false, defaultValue = "") String status,
+            @RequestParam(required = false, defaultValue = "") String tran_date, @RequestParam(required = false, defaultValue = "") String currency,
+            @RequestParam(required = false, defaultValue = "") String card_issuer, @RequestParam(required = false, defaultValue = "") String card_brand,
+            @RequestParam(required = false, defaultValue = "") String card_issuer_country, @RequestParam(required = false, defaultValue = "") String card_issuer_country_code,
+            @RequestParam(required = false, defaultValue = "") String store_id, @RequestParam(required = false, defaultValue = "") String verify_sign,
+            @RequestParam(required = false, defaultValue = "") String verify_key, @RequestParam(required = false, defaultValue = "") String currency_type,
+            @RequestParam(required = false, defaultValue = "") String currency_amount, @RequestParam(required = false, defaultValue = "") String currency_rate,
+            @RequestParam(required = false, defaultValue = "") String base_fair, @RequestParam(required = false, defaultValue = "") String value_a, @RequestParam String value_b,
+            @RequestParam(required = false, defaultValue = "") String value_c, @RequestParam(required = false, defaultValue = "") String value_d,
+            @RequestParam(required = false, defaultValue = "") String risk_level, @RequestParam(required = false, defaultValue = "") String risk_title) throws Exception {
 
         SSLCommerzPaymentInfoModel sslCommerzPaymentInfoModel = new SSLCommerzPaymentInfoModel(UUID.randomUUID().toString(),
                 status, tran_date, tran_id, val_id, amount, store_amount, currency, bank_tran_id,
