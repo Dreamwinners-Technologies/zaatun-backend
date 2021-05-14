@@ -87,6 +87,8 @@ public class ShopPaymentService {
     public ResponseEntity<ApiResponse<String>> ipnListener(SSLCommerzPaymentInfoModel sslCommerzPaymentInfoModel) throws Exception {
         SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9","dokan6070563821cf9@ssl", true);
 
+        System.out.println(sslCommerzPaymentInfoModel.toString());
+
         Map<String, String> formData = new HashMap<>();
         formData.put("verify_key", sslCommerzPaymentInfoModel.getVerify_key());
         formData.put("verify_sign", sslCommerzPaymentInfoModel.getVerify_sign());
