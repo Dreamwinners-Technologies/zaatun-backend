@@ -86,28 +86,31 @@ public class ShopPaymentService {
         SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9", "dokan6070563821cf9@ssl", true);
 
         Map<String, String> formData = new HashMap<>();
-        formData.put("status", sslCommerzPaymentInfo.getStatus());
-        formData.put("tran_date", sslCommerzPaymentInfo.getTran_date());
         formData.put("tran_id", sslCommerzPaymentInfo.getTran_id());
         formData.put("val_id", sslCommerzPaymentInfo.getVal_id());
         formData.put("amount", sslCommerzPaymentInfo.getAmount());
-        formData.put("store_amount", sslCommerzPaymentInfo.getStore_amount());
         formData.put("card_type", sslCommerzPaymentInfo.getCard_type());
+        formData.put("store_amount", sslCommerzPaymentInfo.getStore_amount());
         formData.put("card_no", sslCommerzPaymentInfo.getCard_no());
-        formData.put("currency", sslCommerzPaymentInfo.getCurrency());
         formData.put("bank_tran_id", sslCommerzPaymentInfo.getBank_tran_id());
+        formData.put("tran_date", sslCommerzPaymentInfo.getTran_date());
+        formData.put("currency", sslCommerzPaymentInfo.getCurrency());
+//        formData.put("bank_tran_id", sslCommerzPaymentInfo.getBank_tran_id());
         formData.put("card_issuer", sslCommerzPaymentInfo.getCard_issuer());
         formData.put("card_brand", sslCommerzPaymentInfo.getCard_brand());
         formData.put("card_issuer_country", sslCommerzPaymentInfo.getCard_issuer_country());
         formData.put("card_issuer_country_code", sslCommerzPaymentInfo.getCard_issuer_country_code());
+        formData.put("store_id", sslCommerzPaymentInfo.getStore_id());
+        formData.put("verify_sign", sslCommerzPaymentInfo.getVerify_sign());
+        formData.put("verify_key", sslCommerzPaymentInfo.getVerify_key());
+        formData.put("cus_fax", sslCommerzPaymentInfo.getCus_fax());
         formData.put("currency_type", sslCommerzPaymentInfo.getCurrency_type());
         formData.put("currency_amount", sslCommerzPaymentInfo.getCurrency_amount());
+        formData.put("currency_rate", sslCommerzPaymentInfo.getCurrency_rate());
         formData.put("value_a", sslCommerzPaymentInfo.getValue_a());
         formData.put("value_b", sslCommerzPaymentInfo.getValue_b());
         formData.put("value_c", sslCommerzPaymentInfo.getValue_c());
         formData.put("value_d", sslCommerzPaymentInfo.getValue_d());
-        formData.put("verify_sign", sslCommerzPaymentInfo.getVerify_sign());
-        formData.put("verify_key", sslCommerzPaymentInfo.getVerify_key());
         formData.put("risk_level", sslCommerzPaymentInfo.getRisk_level());
         formData.put("risk_title", sslCommerzPaymentInfo.getRisk_title());
 

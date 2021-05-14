@@ -77,4 +77,8 @@ public class SSLCommerzPaymentInfoModel {
 
     private String risk_title;
 
+    private String store_id;
+
+    private String cus_fax;
+
 }
