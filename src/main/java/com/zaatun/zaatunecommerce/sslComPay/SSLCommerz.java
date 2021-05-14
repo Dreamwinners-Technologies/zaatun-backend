@@ -241,6 +241,7 @@ public class SSLCommerz {
                 // Trim '&' from end of this String
                 hashString = hashString.substring(0, hashString.length() - 1); // omitting last &
 
+                System.out.println(hashString);
                 // Make hash by hash_string and store
                 generateHash = this.md5(hashString);
 
