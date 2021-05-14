@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -129,7 +126,7 @@ public class ShopPaymentService {
                 OrderModel orderModel = orderModelOptional.get();
 
                 orderModel.setPaymentStatus("Paid");
-                orderModel.setPaidAmount(Integer.valueOf(sslCommerzPaymentInfo.getAmount()));
+                orderModel.setPaidAmount(Integer.valueOf(sslCommerzPaymentInfo.getAmount().split("\\.")[0]));
                 orderModel.setPaymentMethod(sslCommerzPaymentInfo.getCard_brand());
 
                 orderRepository.save(orderModel);
