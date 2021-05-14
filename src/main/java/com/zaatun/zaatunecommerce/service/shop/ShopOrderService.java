@@ -209,6 +209,7 @@ public class ShopOrderService {
         deliveryAddress.setFullName(deliveryAddressModel.getFullName());
         deliveryAddress.setAddress(deliveryAddressModel.getAddress());
         deliveryAddress.setPhoneNo(deliveryAddressModel.getPhoneNo());
+        deliveryAddress.setEmail(deliveryAddressModel.getEmail());
         deliveryAddress.setArea(deliveryAddressModel.getArea());
         deliveryAddress.setCity(deliveryAddressModel.getCity());
         deliveryAddress.setRegion(deliveryAddress.getRegion());
@@ -270,6 +271,9 @@ public class ShopOrderService {
     }
 
 
+    public ResponseEntity<ApiResponse<String>> initiatePayment(String token, String orderId) {
+        return null;
+    }
 }
 
 //    public ResponseEntity<ApiResponse<String>> placeOrder(OrderPlaceRequest orderPlaceRequest, String token) {

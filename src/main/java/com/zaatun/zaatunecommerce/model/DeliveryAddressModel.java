@@ -19,6 +19,8 @@ public class DeliveryAddressModel {
 
     private String fullName;
 
+    private String email;
+
     private String phoneNo;
 
     private String address;

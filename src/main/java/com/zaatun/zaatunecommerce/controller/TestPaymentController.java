@@ -29,8 +29,6 @@ public class TestPaymentController {
 
         Map<String, String> postData = new HashMap<>();
 
-//        postData.put("store_id", "");
-//        postData.put("store_passwd", "");
         postData.put("total_amount", "1000");
         postData.put("currency", "BDT");
         postData.put("tran_id", trxId);
