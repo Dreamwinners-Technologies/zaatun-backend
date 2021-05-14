@@ -161,9 +161,10 @@ public class SSLCommerz {
      */
     public boolean orderValidate(String merchantTrnxnId, String merchantTrnxnAmount, String merchantTrnxnCurrency,
                           Map<String, String> requestParameters) throws IOException, NoSuchAlgorithmException {
-        boolean hash_verified = this.ipnHashVerify(requestParameters);
-        if (hash_verified) {
 
+        boolean hash_verified = this.ipnHashVerify(requestParameters);
+        System.out.println(hash_verified);
+        if (hash_verified) {
             String EncodedValID = URLEncoder.encode(requestParameters.get("val_id"), Charset.forName("UTF-8").displayName());
             String EncodedStoreID = URLEncoder.encode(this.storeId, Charset.forName("UTF-8").displayName());
             String EncodedStorePassword = URLEncoder.encode(this.storePass, Charset.forName("UTF-8").displayName());
@@ -178,7 +179,6 @@ public class SSLCommerz {
                 SSLCommerzValidatorResponse resp = Util.extractValidatorResponse(json);//new JavaScriptSerializer().Deserialize < SSLCommerzValidatorResponse > (json);
 
                 if (resp.status.equals("VALID") || resp.status.equals("VALIDATED")) {
-
                     if (merchantTrnxnId.equals(resp.tran_id)
                             && (Math.abs(Double.parseDouble(merchantTrnxnAmount) - Double.parseDouble(resp.currency_amount)) < 1)
                             && merchantTrnxnCurrency.equals(resp.currency_type)) {
@@ -216,9 +216,12 @@ public class SSLCommerz {
         // Check For verify_sign and verify_key parameters
         if (!requestParameters.get("verify_sign").isEmpty() && !requestParameters.get("verify_key").isEmpty()) {
             // Get the verify key
+
+            System.out.println(1);
             String verify_key = requestParameters.get("verify_key");
             if (!verify_key.isEmpty()) {
 
+                System.out.println(2);
                 // Split key String by comma to make a list array
                 keyList = verify_key.split(",");
                 TreeMap<String, String> sortedMap = new TreeMap<String, String>();
@@ -243,6 +246,8 @@ public class SSLCommerz {
 
                 // Check if generated hash and verify_sign match or not
                 // Matched
+                System.out.println(generateHash);
+                System.out.println(requestParameters.get("verify_sign"));
                 return generateHash.equals(requestParameters.get("verify_sign"));
             }
 

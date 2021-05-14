@@ -25,25 +25,24 @@ public class ShopPaymentService {
     public ResponseEntity<ApiResponse<String>> initiatePayment(String token, String orderId) throws Exception {
         Optional<OrderModel> orderModelOptional = orderRepository.findByOrderId(orderId);
 
-        if(orderModelOptional.isPresent()){
-            String trxId = UUID.randomUUID().toString().toUpperCase().substring(0,11);
+        if (orderModelOptional.isPresent()) {
+            String trxId = UUID.randomUUID().toString().toUpperCase().substring(0, 11);
 
             OrderModel orderModel = orderModelOptional.get();
 
             orderModel.setTransactionId(trxId);
 
-            SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9","dokan6070563821cf9@ssl", true);
+            SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9", "dokan6070563821cf9@ssl", true);
 
             StringBuilder products = new StringBuilder();
-            for (OrderProductModel orderProductModel: orderModel.getOrderItems()){
+            for (OrderProductModel orderProductModel : orderModel.getOrderItems()) {
                 products.append(orderProductModel.getProductName()).append(",");
             }
 
             String email;
-            if(orderModel.getDeliveryAddress().getEmail() != null){
+            if (orderModel.getDeliveryAddress().getEmail() != null) {
                 email = orderModel.getDeliveryAddress().getEmail();
-            }
-            else {
+            } else {
                 email = "hjhabib24@gmail.com";
             }
 
@@ -58,7 +57,7 @@ public class ShopPaymentService {
             postData.put("emi_option", "0");
             postData.put("cus_name", orderModel.getDeliveryAddress().getFullName());
             postData.put("cus_email", email);
-            postData.put("cus_add1", orderModel.getDeliveryAddress().getAddress()+orderModel.getDeliveryAddress().getArea());
+            postData.put("cus_add1", orderModel.getDeliveryAddress().getAddress() + orderModel.getDeliveryAddress().getArea());
             postData.put("cus_city", orderModel.getDeliveryAddress().getCity());
             postData.put("cus_postcode", "");
             postData.put("cus_country", "Bangladesh");
@@ -71,32 +70,51 @@ public class ShopPaymentService {
 
             System.out.println(postData.toString());
 
-            String paymentLink = sslCommerz.initiateTransaction(postData,false);
+            String paymentLink = sslCommerz.initiateTransaction(postData, false);
 
             orderRepository.save(orderModel);
 
             return new ResponseEntity<>(new ApiResponse<>(200, "Payment Link Generated", paymentLink), HttpStatus.OK);
 
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Order Found with id: "+ orderId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Order Found with id: " + orderId);
         }
 
     }
 
-    public ResponseEntity<ApiResponse<String>> ipnListener(SSLCommerzPaymentInfoModel sslCommerzPaymentInfoModel) throws Exception {
-        SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9","dokan6070563821cf9@ssl", true);
-
-        System.out.println(sslCommerzPaymentInfoModel.toString());
+    public ResponseEntity<ApiResponse<String>> ipnListener(SSLCommerzPaymentInfoModel sslCommerzPaymentInfo) throws Exception {
+        SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9", "dokan6070563821cf9@ssl", true);
 
         Map<String, String> formData = new HashMap<>();
-        formData.put("verify_key", sslCommerzPaymentInfoModel.getVerify_key());
-        formData.put("verify_sign", sslCommerzPaymentInfoModel.getVerify_sign());
-        formData.put("val_id", sslCommerzPaymentInfoModel.getVal_id());
+        formData.put("status", sslCommerzPaymentInfo.getStatus());
+        formData.put("tran_date", sslCommerzPaymentInfo.getTran_date());
+        formData.put("tran_id", sslCommerzPaymentInfo.getTran_id());
+        formData.put("val_id", sslCommerzPaymentInfo.getVal_id());
+        formData.put("amount", sslCommerzPaymentInfo.getAmount());
+        formData.put("store_amount", sslCommerzPaymentInfo.getStore_amount());
+        formData.put("card_type", sslCommerzPaymentInfo.getCard_type());
+        formData.put("card_no", sslCommerzPaymentInfo.getCard_no());
+        formData.put("currency", sslCommerzPaymentInfo.getCurrency());
+        formData.put("bank_tran_id", sslCommerzPaymentInfo.getBank_tran_id());
+        formData.put("card_issuer", sslCommerzPaymentInfo.getCard_issuer());
+        formData.put("card_brand", sslCommerzPaymentInfo.getCard_brand());
+        formData.put("card_issuer_country", sslCommerzPaymentInfo.getCard_issuer_country());
+        formData.put("card_issuer_country_code", sslCommerzPaymentInfo.getCard_issuer_country_code());
+        formData.put("currency_type", sslCommerzPaymentInfo.getCurrency_type());
+        formData.put("currency_amount", sslCommerzPaymentInfo.getCurrency_amount());
+        formData.put("value_a", sslCommerzPaymentInfo.getValue_a());
+        formData.put("value_b", sslCommerzPaymentInfo.getValue_b());
+        formData.put("value_c", sslCommerzPaymentInfo.getValue_c());
+        formData.put("value_d", sslCommerzPaymentInfo.getValue_d());
+        formData.put("verify_sign", sslCommerzPaymentInfo.getVerify_sign());
+        formData.put("verify_key", sslCommerzPaymentInfo.getVerify_key());
+        formData.put("risk_level", sslCommerzPaymentInfo.getRisk_level());
+        formData.put("risk_title", sslCommerzPaymentInfo.getRisk_title());
 
-        boolean isVerified = sslCommerz.orderValidate(sslCommerzPaymentInfoModel.getTran_id(),
-                sslCommerzPaymentInfoModel.getAmount(),
-                sslCommerzPaymentInfoModel.getCurrency(), formData);
+        System.out.println(sslCommerzPaymentInfo.toString());
+
+        boolean isVerified = sslCommerz.orderValidate(sslCommerzPaymentInfo.getTran_id(),
+                sslCommerzPaymentInfo.getAmount(), sslCommerzPaymentInfo.getCurrency(), formData);
 
         System.out.println(isVerified);
 
