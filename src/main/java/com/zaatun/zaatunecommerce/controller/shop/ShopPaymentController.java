@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -19,6 +20,13 @@ public class ShopPaymentController {
     public ResponseEntity<ApiResponse<String>> initiatePayment(@RequestHeader(name = "Authorization") String token,
                                                                @PathVariable String orderId) throws Exception {
         return shopPaymentService.initiatePayment(token, orderId);
+    }
+
+    @PostMapping("/ipnListener")
+    public ResponseEntity<ApiResponse<String>> ipnListener(@RequestParam Map<String, String> allParams) throws Exception {
+
+
+        return shopPaymentService.ipnListenerTest(allParams);
     }
 
     @PostMapping("/ipnListener")

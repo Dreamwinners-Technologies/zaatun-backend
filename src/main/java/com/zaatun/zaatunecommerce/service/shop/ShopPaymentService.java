@@ -114,6 +114,9 @@ public class ShopPaymentService {
         formData.put("risk_level", sslCommerzPaymentInfo.getRisk_level());
         formData.put("risk_title", sslCommerzPaymentInfo.getRisk_title());
 
+        formData.put("base_fair", sslCommerzPaymentInfo.getBase_fair());
+        formData.put("status", sslCommerzPaymentInfo.getStatus());
+
         System.out.println(sslCommerzPaymentInfo.toString());
 
         boolean isVerified = sslCommerz.orderValidate(sslCommerzPaymentInfo.getTran_id(),
@@ -123,4 +126,13 @@ public class ShopPaymentService {
 
         return null;
     }
+
+//    public ResponseEntity<ApiResponse<String>> ipnListenerTest(Map<String, String> allParams) {
+//
+//        allParams.entrySet().forEach(entry -> {
+//            System.out.println(entry.getKey() + " " + entry.getValue());
+//        });
+//
+//        return null;
+//    }
 }
