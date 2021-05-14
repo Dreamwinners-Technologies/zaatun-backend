@@ -123,7 +123,7 @@ public class ShopPaymentService {
                 sslCommerzPaymentInfo.getAmount(), sslCommerzPaymentInfo.getCurrency(), formData);
 
         if(isVerified){
-            Optional<OrderModel> orderModelOptional = orderRepository.findByOrderId(sslCommerzPaymentInfo.getTran_id());
+            Optional<OrderModel> orderModelOptional = orderRepository.findByTransactionId(sslCommerzPaymentInfo.getTran_id());
 
             if(orderModelOptional.isPresent()){
                 OrderModel orderModel = orderModelOptional.get();
