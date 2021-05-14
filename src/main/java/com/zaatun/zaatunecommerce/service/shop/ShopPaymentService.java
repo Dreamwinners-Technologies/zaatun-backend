@@ -103,7 +103,7 @@ public class ShopPaymentService {
         formData.put("store_id", sslCommerzPaymentInfo.getStore_id());
         formData.put("verify_sign", sslCommerzPaymentInfo.getVerify_sign());
         formData.put("verify_key", sslCommerzPaymentInfo.getVerify_key());
-        formData.put("cus_fax", sslCommerzPaymentInfo.getCus_fax());
+//        formData.put("cus_fax", sslCommerzPaymentInfo.getCus_fax());
         formData.put("currency_type", sslCommerzPaymentInfo.getCurrency_type());
         formData.put("currency_amount", sslCommerzPaymentInfo.getCurrency_amount());
         formData.put("currency_rate", sslCommerzPaymentInfo.getCurrency_rate());

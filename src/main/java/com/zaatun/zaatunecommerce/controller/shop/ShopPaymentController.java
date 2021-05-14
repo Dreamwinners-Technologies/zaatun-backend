@@ -31,7 +31,7 @@ public class ShopPaymentController {
                                                            @RequestParam String card_issuer_country,
                                                            @RequestParam String card_issuer_country_code,
                                                            @RequestParam String store_id, @RequestParam String verify_sign,
-                                                           @RequestParam String verify_key, @RequestParam String cus_fax,
+                                                           @RequestParam String verify_key,
                                                            @RequestParam String currency_type, @RequestParam String currency_amount,
                                                            @RequestParam String currency_rate, @RequestParam String base_fair,
                                                            @RequestParam String value_a, @RequestParam String value_b,
@@ -42,8 +42,7 @@ public class ShopPaymentController {
                 status, tran_date, tran_id, val_id, amount, store_amount, currency, bank_tran_id,
                 card_type, card_no, card_issuer, card_brand, card_issuer_country, card_issuer_country_code, currency_type,
                 currency_amount, currency_rate, base_fair, value_a, value_b, value_c,
-                value_d, "", "", "", verify_sign, verify_key, risk_level, risk_title, store_id,
-                cus_fax);
+                value_d, "", "", "", verify_sign, verify_key, risk_level, risk_title, store_id);
 
         return shopPaymentService.ipnListener(sslCommerzPaymentInfoModel);
     }
