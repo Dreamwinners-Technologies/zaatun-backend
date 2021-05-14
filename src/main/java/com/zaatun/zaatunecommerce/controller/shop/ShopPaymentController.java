@@ -22,12 +22,12 @@ public class ShopPaymentController {
         return shopPaymentService.initiatePayment(token, orderId);
     }
 
-    @PostMapping("/ipnListener")
-    public ResponseEntity<ApiResponse<String>> ipnListener(@RequestParam Map<String, String> allParams) throws Exception {
-
-
-        return shopPaymentService.ipnListenerTest(allParams);
-    }
+//    @PostMapping("/ipnListener")
+//    public ResponseEntity<ApiResponse<String>> ipnListener(@RequestParam Map<String, String> allParams) throws Exception {
+//
+//
+//        return shopPaymentService.ipnListenerTest(allParams);
+//    }
 
     @PostMapping("/ipnListener")
     public ResponseEntity<ApiResponse<String>> ipnListener(@RequestParam String tran_id, @RequestParam String val_id,
