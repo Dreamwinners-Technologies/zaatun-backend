@@ -117,14 +117,28 @@ public class ShopPaymentService {
         formData.put("base_fair", sslCommerzPaymentInfo.getBase_fair());
         formData.put("status", sslCommerzPaymentInfo.getStatus());
 
-        System.out.println(sslCommerzPaymentInfo.toString());
+//        System.out.println(sslCommerzPaymentInfo.toString());
 
         boolean isVerified = sslCommerz.orderValidate(sslCommerzPaymentInfo.getTran_id(),
                 sslCommerzPaymentInfo.getAmount(), sslCommerzPaymentInfo.getCurrency(), formData);
 
-        System.out.println(isVerified);
+        if(isVerified){
+            Optional<OrderModel> orderModelOptional = orderRepository.findByOrderId(sslCommerzPaymentInfo.getTran_id());
 
-        return null;
+            if(orderModelOptional.isPresent()){
+                OrderModel orderModel = orderModelOptional.get();
+
+                orderModel.setPaymentStatus("Paid");
+                orderModel.setPaidAmount(Integer.valueOf(sslCommerzPaymentInfo.getAmount()));
+                orderModel.setPaymentMethod(sslCommerzPaymentInfo.getCard_brand());
+
+                orderRepository.save(orderModel);
+
+                return new ResponseEntity<>(new ApiResponse<>(200, "Payment Successful", null), HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>(new ApiResponse<>(400, "Payment UnSuccessful", null), HttpStatus.BAD_REQUEST);
     }
 
 //    public ResponseEntity<ApiResponse<String>> ipnListenerTest(Map<String, String> allParams) {
