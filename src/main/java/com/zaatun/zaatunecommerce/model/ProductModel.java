@@ -43,10 +43,12 @@ public class ProductModel {
     @NotBlank
     private String brand;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+//    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private CategoryModel categoryModel;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+//    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private SubCategoryModel subCategoryModel;
 
     @Column(columnDefinition="TEXT")
