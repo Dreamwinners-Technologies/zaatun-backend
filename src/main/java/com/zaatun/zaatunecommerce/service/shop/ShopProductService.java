@@ -64,7 +64,7 @@ public class ShopProductService {
                 .productName(productName)
                 .brand(brand)
                 .categoryModel(CategoryModel.builder().categorySlug(categorySlug).build())
-                .subCategoryModel(SubCategoryModel.builder().subCategoryId(subCategorySlug).build())
+                .subCategoryModel(SubCategoryModel.builder().subCategorySlug(subCategorySlug).build())
                 .inStock(inStock)
                 .isFeatured(isFeatured)
                 .specification(exSpecification)
