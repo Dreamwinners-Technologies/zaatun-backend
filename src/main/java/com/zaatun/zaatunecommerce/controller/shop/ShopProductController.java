@@ -4,6 +4,7 @@ import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponseV2;
 import com.zaatun.zaatunecommerce.model.ProductReviewModel;
 import com.zaatun.zaatunecommerce.service.shop.ShopProductService;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,25 @@ public class ShopProductController {
             @RequestHeader(name = "Authorization", required = false) String token) {
 
         return shopProductService.getProducts(productName, brand, categorySlug, subCategorySlug, productSlug, inStock,
+                isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera, sortBy, orderBy,
+                pageSize, pageNo, rating, token);
+    }
+
+    @GetMapping("/v2/")
+    public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponseV2>>>> getProductsV2(
+            @RequestParam(required = false) String productName, String brand,
+            String categorySlug, String subCategorySlug, String productSlug,
+            Boolean inStock, Boolean isFeatured, String processor,
+            String battery, String ram,
+            String rom, String screenSize, String backCamera, String frontCamera,
+            @RequestParam(defaultValue = "createdOn") String sortBy,
+            @RequestParam(defaultValue = "ASC") Sort.Direction orderBy,
+            @RequestParam(defaultValue = "50") int pageSize,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(required = false) Integer rating,
+            @RequestHeader(name = "Authorization", required = false) String token) {
+
+        return shopProductService.getProductsV2(productName, brand, categorySlug, subCategorySlug, productSlug, inStock,
                 isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera, sortBy, orderBy,
                 pageSize, pageNo, rating, token);
     }

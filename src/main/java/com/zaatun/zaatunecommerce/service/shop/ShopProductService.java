@@ -4,6 +4,8 @@ import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponseV2;
+import com.zaatun.zaatunecommerce.dto.response.shop.ShopVariationResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.AffiliateUserRepository;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,48 +45,16 @@ public class ShopProductService {
                 int pageNo, Integer rating, String token) {
 
         String userId = null;
-        if(token != null && !token.isEmpty()){
+        if (token != null && !token.isEmpty()) {
             userId = getUserId(token);
         }
 
 
         //Example Specification for filtering
-        SpecificationModel exSpecification = SpecificationModel.builder()
-                .processor(processor)
-                .battery(battery)
-                .ram(ram)
-                .rom(rom)
-                .screenSize(screenSize)
-                .backCamera(backCamera)
-                .frontCamera(frontCamera)
-                .build();
-
-        //Example Product for filtering
-        ProductModel exProduct = ProductModel.builder()
-                .productSlug(productSlug)
-                .productName(productName)
-                .brand(brand)
-                .categoryModel(CategoryModel.builder().categorySlug(categorySlug).build())
-                .subCategoryModel(SubCategoryModel.builder().subCategorySlug(subCategorySlug).build())
-                .inStock(inStock)
-                .isFeatured(isFeatured)
-                .specification(exSpecification)
-                .build();
+        ProductModel exProduct = getExampleProductModel(productName, brand, categorySlug, subCategorySlug, productSlug, inStock, isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera);
 
         //Sort Functionality
-        Pageable pageable;
-        Sort sort = Sort.by(orderBy, sortBy); //OrderBy is Column name and sortBy is Direction
-
-        pageable = PageRequest.of(pageNo, pageSize, sort); //Make pageable object for pagination
-
-        //Example matcher logics for advance searching
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withMatcher("productName", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase()) //productName advance search
-                .withMatcher("brand", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
-
-        //Getting products from database with pagination
-        Page<ProductModel> productModelPage = productRepository.findAll(Example.of(exProduct, matcher), pageable);
+        Page<ProductModel> productModelPage = getProductsFromDb(sortBy, orderBy, pageSize, pageNo, exProduct);
 
         //Getting only the products
         List<ProductModel> productModels = productModelPage.getContent();
@@ -146,11 +117,14 @@ public class ShopProductService {
 
     private String getUserId(String token) {
         String userId = null;
-        String username = jwtProvider.getUserNameFromJwt(token);
-        Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(username);
-        if(profileModelOptional.isPresent()){
-            userId = profileModelOptional.get().getId();
+        if (token != null && !token.isEmpty()) {
+            String username = jwtProvider.getUserNameFromJwt(token);
+            Optional<ProfileModel> profileModelOptional = profileRepository.findByUsername(username);
+            if (profileModelOptional.isPresent()) {
+                userId = profileModelOptional.get().getId();
+            }
         }
+
         return userId;
     }
 
@@ -200,6 +174,107 @@ public class ShopProductService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Product Found with that id.");
         }
 
+    }
+
+    public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponseV2>>>> getProductsV2(
+            String productName, String brand, String categorySlug, String subCategorySlug, String productSlug,
+            Boolean inStock, Boolean isFeatured, String processor, String battery, String ram, String rom,
+            String screenSize, String backCamera, String frontCamera, String sortBy, Sort.Direction orderBy,
+            int pageSize, int pageNo, Integer rating, String token) {
+
+        String userId = null;
+        if (token != null && !token.isEmpty()) {
+            userId = getUserId(token);
+        }
+
+        //Example Specification for filtering
+        ProductModel exProduct = getExampleProductModel(productName, brand, categorySlug, subCategorySlug, productSlug, inStock, isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera);
+        Page<ProductModel> productModelPage = getProductsFromDb(sortBy, orderBy, pageSize, pageNo, exProduct);
+
+        //Getting only the products
+        List<ProductModel> productModels = productModelPage.getContent();
+
+        List<ShopProductResponseV2> shopProductResponseV2s = new ArrayList<>();
+        for (ProductModel productModel: productModels){
+            int totalReview = 0;
+            Integer totalReviewStar = 0;
+            for (ProductReviewModel productReviewModel: productModel.getProductReviews()){
+                totalReview++;
+                totalReviewStar += productReviewModel.getReviewStar();
+            }
+            Double reviewStar =  (double)totalReviewStar / (double)totalReview;
+
+            List<ShopVariationResponse> shopVariationResponses = new ArrayList<>();
+
+            for (ProductVariationModel productVariationModel: productModel.getVariations()){
+                ShopVariationResponse shopVariationResponse = new ShopVariationResponse(productVariationModel.getId(),
+                        productVariationModel.getStock(), productVariationModel.getInStock(), productVariationModel.getIsDefault(),
+                        productVariationModel.getRegularPrice(), productVariationModel.getDiscountPrice(),
+                        productVariationModel.getAttributeCombinations());
+
+                shopVariationResponses.add(shopVariationResponse);
+            }
+
+            ShopProductResponseV2 shopProductResponseV2 = new ShopProductResponseV2(productModel.getProductName(),
+                    productModel.getProductSlug(), productModel.getProductBadge(), productModel.getBrand(),
+                    productModel.getShortDescription(), productModel.getInStock(), productModel.getProductImages(),
+                    shopVariationResponses, reviewStar);
+
+            shopProductResponseV2s.add(shopProductResponseV2);
+        }
+
+        PaginationResponse<List<ShopProductResponseV2>> paginationResponse = new PaginationResponse<>(pageSize, pageNo,
+                shopProductResponseV2s.size(), productModelPage.isLast(), productModelPage.getTotalElements(),
+                productModelPage.getTotalPages(), shopProductResponseV2s);
+
+        if (productModelPage.isEmpty()) {
+            //If there is no product found
+            return new ResponseEntity<>(new ApiResponse<>(200, "No Product Found", paginationResponse), HttpStatus.OK);
+        } else {
+            //If products are found
+            return new ResponseEntity<>(new ApiResponse<>(200, "Product Found", paginationResponse), HttpStatus.OK);
+        }
+    }
+
+    private Page<ProductModel> getProductsFromDb(String sortBy, Sort.Direction orderBy, int pageSize, int pageNo, ProductModel exProduct) {
+        //Sort Functionality
+        Pageable pageable;
+        Sort sort = Sort.by(orderBy, sortBy); //OrderBy is Column name and sortBy is Direction
+
+        pageable = PageRequest.of(pageNo, pageSize, sort); //Make pageable object for pagination
+
+        //Example matcher logics for advance searching
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withMatcher("productName", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase()) //productName advance search
+                .withMatcher("brand", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
+
+        //Getting products from database with pagination
+        return productRepository.findAll(Example.of(exProduct, matcher), pageable);
+    }
+
+    private ProductModel getExampleProductModel(String productName, String brand, String categorySlug, String subCategorySlug, String productSlug, Boolean inStock, Boolean isFeatured, String processor, String battery, String ram, String rom, String screenSize, String backCamera, String frontCamera) {
+        SpecificationModel exSpecification = SpecificationModel.builder()
+                .processor(processor)
+                .battery(battery)
+                .ram(ram)
+                .rom(rom)
+                .screenSize(screenSize)
+                .backCamera(backCamera)
+                .frontCamera(frontCamera)
+                .build();
+
+        //Example Product for filtering
+        return ProductModel.builder()
+                .productSlug(productSlug)
+                .productName(productName)
+                .brand(brand)
+                .categoryModel(CategoryModel.builder().categorySlug(categorySlug).build())
+                .subCategoryModel(SubCategoryModel.builder().subCategorySlug(subCategorySlug).build())
+                .inStock(inStock)
+                .isFeatured(isFeatured)
+                .specification(exSpecification)
+                .build();
     }
 }
 
