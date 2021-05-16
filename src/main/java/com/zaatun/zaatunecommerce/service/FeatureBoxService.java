@@ -7,6 +7,7 @@ import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.FeatureBoxModel;
 import com.zaatun.zaatunecommerce.repository.FeatureBoxRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -88,7 +89,8 @@ public class FeatureBoxService {
     }
 
     public ResponseEntity<ApiResponse<List<FeatureBoxModel>>> getFeatureBoxList() {
-        List<FeatureBoxModel> featureBoxModels = featureBoxRepository.findAll();
+        Sort sort = Sort.by(Sort.Direction.ASC, "sequenceNo");
+        List<FeatureBoxModel> featureBoxModels = featureBoxRepository.findAll(sort);
 
         if (featureBoxModels.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse<>(200, "No Feature Box Found", featureBoxModels),
