@@ -30,6 +30,7 @@ public class ProductService {
     private final SubCategoryRepository subCategoryRepository;
     private final ImageUtilService imageUtilService;
     private final ProductAttributesModelRepository productAttributesModelRepository;
+    private final ShortStatisticsRepository shortStatisticsRepository;
 
 
     public ResponseEntity<ApiResponse<String>> addProduct(String token, AddProductRequest addProductRequest) {
@@ -118,6 +119,10 @@ public class ProductService {
             productModel.setVariations(productVariationModels);
 //            System.out.println(productModel.toString());
             productRepository.save(productModel);
+
+            ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+            shortStatisticsModel.setTotalProducts(shortStatisticsModel.getTotalProducts() + 1);
+            shortStatisticsRepository.save(shortStatisticsModel);
 
             return new ResponseEntity<>(new ApiResponse<>(201, "Product Added Successful", basicTableInfo.getId()), HttpStatus.CREATED);
 

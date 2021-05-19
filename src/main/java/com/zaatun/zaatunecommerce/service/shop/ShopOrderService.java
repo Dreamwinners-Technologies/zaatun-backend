@@ -37,6 +37,7 @@ public class ShopOrderService {
     private final UtilService utilService;
     private final ShopOrderServiceExtended shopOrderServiceExtended;
     private final ProductVariationRepository productVariationRepository;
+    private final ShortStatisticsRepository shortStatisticsRepository;
 
     //Order Place Request
 
@@ -70,6 +71,7 @@ public class ShopOrderService {
 
                 //Check if the buyers profile has the deliveryAddress
                 if (profileModel.getDeliveryAddresses().contains(deliveryAddressModel)) {
+                    ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
 
                     //Setting admin discount to 0
                     Integer adminDiscount = 0;
@@ -169,13 +171,18 @@ public class ShopOrderService {
                         productModels.add(productVariationModel.getProductModel());
                     }
 
+                    shortStatisticsModel.setTotalOrders(shortStatisticsModel.getTotalOrders() + 1);
+                    shortStatisticsModel.setPendingOrders(shortStatisticsModel.getPendingOrders() + 1);
+
                     //Affiliate Functionality starts
                     shopOrderServiceExtended.affiliateFunctionalities(orderPlaceRequest, profileModel, productModels);
-
+                    shortStatisticsModel.setTotalOrders(shortStatisticsModel.getTotalOrders() + 1);
+                    shortStatisticsModel.setPendingOrders(shortStatisticsModel.getPendingOrders() + 1);
 
                     orderRepository.save(orderModel);
                     productVariationRepository.saveAll(productVariationModels);
                     profileRepository.save(profileModel);
+                    shortStatisticsRepository.save(shortStatisticsModel);
 
                     return new ResponseEntity<>(new ApiResponse<>(201, "Order Placed Successful", orderId), HttpStatus.CREATED);
                 } else {

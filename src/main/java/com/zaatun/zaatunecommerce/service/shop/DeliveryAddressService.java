@@ -34,6 +34,7 @@ public class DeliveryAddressService {
             DeliveryAddressModel deliveryAddressModel = DeliveryAddressModel.builder()
                     .fullName(shopDeliveryAddressRequest.getFullName())
                     .phoneNo(shopDeliveryAddressRequest.getPhoneNo())
+                    .email(shopDeliveryAddressRequest.getEmail())
                     .address(shopDeliveryAddressRequest.getAddress())
                     .area(shopDeliveryAddressRequest.getArea())
                     .city(shopDeliveryAddressRequest.getCity())
@@ -90,6 +91,7 @@ public class DeliveryAddressService {
                 if (deliveryAddressModels.contains(deliveryAddressModel)){
                     deliveryAddressModel.setFullName(shopDeliveryAddressRequest.getFullName());
                     deliveryAddressModel.setPhoneNo(shopDeliveryAddressRequest.getPhoneNo());
+                    deliveryAddressModel.setEmail(shopDeliveryAddressRequest.getEmail());
                     deliveryAddressModel.setAddress(shopDeliveryAddressRequest.getAddress());
                     deliveryAddressModel.setArea(shopDeliveryAddressRequest.getArea());
                     deliveryAddressModel.setCity(shopDeliveryAddressRequest.getCity());

@@ -11,10 +11,12 @@ import com.zaatun.zaatunecommerce.model.ProfileModel;
 import com.zaatun.zaatunecommerce.jwt.model.Role;
 import com.zaatun.zaatunecommerce.jwt.model.RoleName;
 import com.zaatun.zaatunecommerce.jwt.model.UserModel;
+import com.zaatun.zaatunecommerce.model.ShortStatisticsModel;
 import com.zaatun.zaatunecommerce.repository.ProfileRepository;
 import com.zaatun.zaatunecommerce.jwt.repository.RoleRepository;
 import com.zaatun.zaatunecommerce.jwt.repository.UserRepository;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
+import com.zaatun.zaatunecommerce.repository.ShortStatisticsRepository;
 import lombok.AllArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.HttpStatus;
@@ -43,6 +45,7 @@ public class SignUpAndSignInService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ProfileRepository profileRepository;
+    private final ShortStatisticsRepository shortStatisticsRepository;
 
     public ResponseEntity<ApiResponse<String>> signUp(SignUpForm signUpRequest) {
         String emailOrPhone = signUpRequest.getEmailOrPhone();
@@ -85,6 +88,10 @@ public class SignUpAndSignInService {
 
         profileRepository.save(profileModel);
         userRepository.saveAndFlush(userModel);
+
+        ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+        shortStatisticsModel.setTotalUsers(shortStatisticsModel.getTotalUsers() + 1);
+        shortStatisticsRepository.save(shortStatisticsModel);
 
         return new ResponseEntity<>(new ApiResponse<String>(201, "Account Created", null), HttpStatus.CREATED);
     }

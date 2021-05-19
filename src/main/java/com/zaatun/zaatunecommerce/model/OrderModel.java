@@ -71,4 +71,8 @@ public class OrderModel {
 
     private String orderComment;
 
+    private String riskLevel;
+
+    private String riskTitle;
+
 }

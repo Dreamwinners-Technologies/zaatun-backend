@@ -4,10 +4,11 @@ import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.OrderProcessRequest;
 import com.zaatun.zaatunecommerce.dto.response.OrderResponse;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProductResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
+import com.zaatun.zaatunecommerce.repository.OrderProcessHistoryRepository;
 import com.zaatun.zaatunecommerce.repository.OrderRepository;
+import com.zaatun.zaatunecommerce.repository.ShortStatisticsRepository;
 import com.zaatun.zaatunecommerce.service.shop.ShopProductHelperService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
@@ -26,6 +27,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ShopProductHelperService shopProductHelperService;
     private final JwtProvider jwtProvider;
+    private final ShortStatisticsRepository shortStatisticsRepository;
+    private final OrderProcessHistoryRepository orderProcessHistoryRepository;
 
     public ResponseEntity<ApiResponse<PaginationResponse<List<OrderResponse>>>>
     getAllOrders(String sortBy, boolean isCompleted, Sort.Direction sortDirection, int pageNo, int pageSize,
@@ -99,6 +102,10 @@ public class OrderService {
             String updatedBy = jwtProvider.getNameFromJwt(token);
             Long updateOn = System.currentTimeMillis();
 
+            ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+
+            setShortStat(orderProcessRequest, orderModel, shortStatisticsModel);
+
             if (orderProcessRequest.getOrderStatus().toString().equalsIgnoreCase("delivered") ||
                     orderProcessRequest.getOrderStatus().toString().equalsIgnoreCase("canceled")) {
                 orderModel.setIsCompleted(true);
@@ -121,6 +128,7 @@ public class OrderService {
             orderModel.setUpdatedOn(updateOn);
 
             orderRepository.save(orderModel);
+            shortStatisticsRepository.save(shortStatisticsModel);
 
             return new ResponseEntity<>(new ApiResponse<>(201, "Updated Order Status Successful",
                     orderProcessRequest.getOrderStatus().toString()), HttpStatus.CREATED);
@@ -137,6 +145,43 @@ public class OrderService {
             return new ResponseEntity<>(new ApiResponse<>(200, "Order Delete Successful", null), HttpStatus.OK);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No Order Found with id: " + orderId);
+        }
+    }
+
+    private void setShortStat(OrderProcessRequest orderProcessRequest, OrderModel orderModel, ShortStatisticsModel shortStatisticsModel) {
+        if(orderModel.getOrderStatus().equalsIgnoreCase("PENDING")){
+            shortStatisticsModel.setPendingOrders(shortStatisticsModel.getPendingOrders() - 1);
+        }
+        else if(orderModel.getOrderStatus().equalsIgnoreCase("PROCESSING")){
+            shortStatisticsModel.setProcessingOrders(shortStatisticsModel.getProcessingOrders() - 1);
+        }
+        else if(orderModel.getOrderStatus().equalsIgnoreCase("SHIPPED")){
+            shortStatisticsModel.setShippedOrders(shortStatisticsModel.getShippedOrders() - 1);
+        }
+        else if(orderModel.getOrderStatus().equalsIgnoreCase("DELIVERED")){
+            shortStatisticsModel.setDeliveredOrders(shortStatisticsModel.getDeliveredOrders() - 1);
+        }
+        else if(orderModel.getOrderStatus().equalsIgnoreCase("CANCELLED")){
+            shortStatisticsModel.setCanceledOrders(shortStatisticsModel.getCanceledOrders() - 1);
+        }
+        else if(orderModel.getOrderStatus().equalsIgnoreCase("POSTPONED")){
+            shortStatisticsModel.setPostponedOrders(shortStatisticsModel.getPostponedOrders() - 1);
+        }
+
+        if(orderProcessRequest.getOrderStatus().equals(OrderStatuses.PROCESSING)){
+            shortStatisticsModel.setProcessingOrders(shortStatisticsModel.getProcessingOrders() + 1);
+        }
+        else if(orderProcessRequest.getOrderStatus().equals(OrderStatuses.SHIPPED)){
+            shortStatisticsModel.setShippedOrders(shortStatisticsModel.getShippedOrders() + 1);
+        }
+        else if(orderProcessRequest.getOrderStatus().equals(OrderStatuses.DELIVERED)){
+            shortStatisticsModel.setDeliveredOrders(shortStatisticsModel.getDeliveredOrders() + 1);
+        }
+        else if(orderProcessRequest.getOrderStatus().equals(OrderStatuses.CANCELLED)){
+            shortStatisticsModel.setCanceledOrders(shortStatisticsModel.getCanceledOrders() + 1);
+        }
+        else if(orderProcessRequest.getOrderStatus().equals(OrderStatuses.POSTPONED)){
+            shortStatisticsModel.setPostponedOrders(shortStatisticsModel.getPostponedOrders() + 1);
         }
     }
 }

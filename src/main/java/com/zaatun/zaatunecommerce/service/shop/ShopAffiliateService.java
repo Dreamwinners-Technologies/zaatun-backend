@@ -7,8 +7,10 @@ import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.AffiliateUserModel;
 import com.zaatun.zaatunecommerce.model.AffiliateWithdrawModel;
 import com.zaatun.zaatunecommerce.model.ProfileModel;
+import com.zaatun.zaatunecommerce.model.ShortStatisticsModel;
 import com.zaatun.zaatunecommerce.repository.AffiliateUserRepository;
 import com.zaatun.zaatunecommerce.repository.ProfileRepository;
+import com.zaatun.zaatunecommerce.repository.ShortStatisticsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class ShopAffiliateService {
     private final ProfileRepository profileRepository;
     private final AffiliateUserRepository affiliateUserRepository;
     private final JwtProvider jwtProvider;
+    private final ShortStatisticsRepository shortStatisticsRepository;
 
     public ResponseEntity<ApiResponse<String>> beAffiliate(String token) {
         String username = jwtProvider.getUserNameFromJwt(token);
@@ -49,6 +52,10 @@ public class ShopAffiliateService {
             profileModel.setAffiliateUser(affiliateUserModel);
 
             profileRepository.save(profileModel);
+
+            ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+            shortStatisticsModel.setNewAffiliateUserRequests(shortStatisticsModel.getNewAffiliateUserRequests() + 1);
+            shortStatisticsRepository.save(shortStatisticsModel);
 
             return new ResponseEntity<>(new ApiResponse<>(201, "Be affiliate requested.Wait for Approval",
                     null), HttpStatus.CREATED);
@@ -91,6 +98,10 @@ public class ShopAffiliateService {
                         affiliateWithdrawModels.add(affiliateWithdrawModel);
 
                         profileRepository.save(profileModel);
+
+                        ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+                        shortStatisticsModel.setAffiliateWithdrawPending(shortStatisticsModel.getAffiliateWithdrawPending() + 1);
+                        shortStatisticsRepository.save(shortStatisticsModel);
 
                         return new ResponseEntity<>(new ApiResponse<>(201, "Withdraw Request is Placed. Wait for admin Approval.", null), HttpStatus.CREATED);
                     }

@@ -8,8 +8,10 @@ import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.AffiliateUserModel;
 import com.zaatun.zaatunecommerce.model.AffiliateWithdrawModel;
 import com.zaatun.zaatunecommerce.model.ProfileModel;
+import com.zaatun.zaatunecommerce.model.ShortStatisticsModel;
 import com.zaatun.zaatunecommerce.repository.AffiliateWithdrawRepository;
 import com.zaatun.zaatunecommerce.repository.ProfileRepository;
+import com.zaatun.zaatunecommerce.repository.ShortStatisticsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ public class AffiliateService {
     private final ProfileRepository profileRepository;
     private final AffiliateWithdrawRepository affiliateWithdrawRepository;
     private final JwtProvider jwtProvider;
+    private final ShortStatisticsRepository shortStatisticsRepository;
 
 //    public ResponseEntity<ApiResponse<PaginationResponse<List<ProfileModel>>>> getNewAffiliateUsers(int pageSize, int pageNo) {
 //        ProfileModel exampleProfile = ProfileModel.builder()
@@ -73,6 +76,10 @@ public class AffiliateService {
             affiliateUserModel.setIsApproved(true);
             affiliateUserModel.setAffiliateUserSlug(affiliateUserSlug);
             profileRepository.save(profileModel);
+
+            ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+            shortStatisticsModel.setNewAffiliateUserRequests(shortStatisticsModel.getNewAffiliateUserRequests() - 1);
+            shortStatisticsRepository.save(shortStatisticsModel);
 
             return new ResponseEntity<>(new ApiResponse<>(200, "Affiliate User is Approved", id), HttpStatus.ACCEPTED);
         } else {
@@ -196,6 +203,17 @@ public class AffiliateService {
             affiliateUserModel.setUpdatedOn(updatedOn);
 
             affiliateWithdrawRepository.save(affiliateWithdrawModel);
+
+            ShortStatisticsModel shortStatisticsModel = shortStatisticsRepository.findById(0).get();
+            if(isApproved){
+                shortStatisticsModel.setAffiliateWithdrawPending(shortStatisticsModel.getAffiliateWithdrawPending() - 1);
+                shortStatisticsModel.setAffiliateWithdrawCompleted(shortStatisticsModel.getAffiliateWithdrawCompleted() + 1);
+            }
+            else {
+                shortStatisticsModel.setAffiliateWithdrawPending(shortStatisticsModel.getAffiliateWithdrawPending() - 1);
+                shortStatisticsModel.setAffiliateWithdrawCancelled(shortStatisticsModel.getAffiliateWithdrawCancelled() + 1);
+            }
+            shortStatisticsRepository.save(shortStatisticsModel);
 
             return new ResponseEntity<>(new ApiResponse<>(200, "Withdraw Request Approved", null), HttpStatus.OK);
         } else {

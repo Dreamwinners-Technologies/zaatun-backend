@@ -23,7 +23,7 @@ public class ShopPaymentService {
         Optional<OrderModel> orderModelOptional = orderRepository.findByOrderId(orderId);
 
         if (orderModelOptional.isPresent()) {
-            String trxId = UUID.randomUUID().toString().toUpperCase().substring(0, 11);
+            String trxId = "ZTN-T-" + UUID.randomUUID().toString().toUpperCase().substring(0, 11);
 
             OrderModel orderModel = orderModelOptional.get();
 
@@ -54,14 +54,14 @@ public class ShopPaymentService {
             postData.put("emi_option", "0");
             postData.put("cus_name", orderModel.getDeliveryAddress().getFullName());
             postData.put("cus_email", email);
-            postData.put("cus_add1", orderModel.getDeliveryAddress().getAddress() + orderModel.getDeliveryAddress().getArea());
+            postData.put("cus_add1", orderModel.getDeliveryAddress().getAddress() + ", " + orderModel.getDeliveryAddress().getArea());
             postData.put("cus_city", orderModel.getDeliveryAddress().getCity());
             postData.put("cus_postcode", "");
             postData.put("cus_country", "Bangladesh");
             postData.put("cus_phone", orderModel.getDeliveryAddress().getPhoneNo());
             postData.put("shipping_method", "Courier");
             postData.put("num_of_item", String.valueOf(orderModel.getOrderItems().size()));
-            postData.put("product_name", products.toString());
+            postData.put("product_name", products.substring(0, products.length()-1));
             postData.put("product_profile", "general");
 
 
@@ -128,6 +128,8 @@ public class ShopPaymentService {
                 orderModel.setPaymentStatus("Paid");
                 orderModel.setPaidAmount(Integer.valueOf(sslCommerzPaymentInfo.getAmount().split("\\.")[0]));
                 orderModel.setPaymentMethod(sslCommerzPaymentInfo.getCard_brand());
+                orderModel.setRiskLevel(sslCommerzPaymentInfo.getRisk_level());
+                orderModel.setRiskTitle(sslCommerzPaymentInfo.getRisk_title());
 
                 orderRepository.save(orderModel);
 
@@ -137,13 +139,4 @@ public class ShopPaymentService {
 
         return new ResponseEntity<>(new ApiResponse<>(400, "Payment UnSuccessful", null), HttpStatus.BAD_REQUEST);
     }
-
-//    public ResponseEntity<ApiResponse<String>> ipnListenerTest(Map<String, String> allParams) {
-//
-//        allParams.entrySet().forEach(entry -> {
-//            System.out.println(entry.getKey() + " " + entry.getValue());
-//        });
-//
-//        return null;
-//    }
 }
