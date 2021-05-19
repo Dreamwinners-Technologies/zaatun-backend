@@ -71,6 +71,7 @@ public class SignUpAndSignInService {
         ProfileModel profileModel = ProfileModel.builder()
                 .id(UUID.randomUUID().toString())
                 .name(signUpRequest.getName())
+                .createdOn(System.currentTimeMillis())
                 .phoneNo(phone)
                 .email(email)
                 .username(userName)

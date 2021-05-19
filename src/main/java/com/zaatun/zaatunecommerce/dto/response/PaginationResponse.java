@@ -12,9 +12,9 @@ import lombok.Setter;
 public class PaginationResponse<T> {
     int pageSize;
     int pageNo;
-    int productCount;
+    int itemCount;
     boolean isLastPage;
-    Long totalProduct;
+    Long totalItems;
     int totalPages;
 
     T data;

@@ -1,5 +1,6 @@
 package com.zaatun.zaatunecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
@@ -23,6 +24,8 @@ public class ProfileModel {
 
     @Id
     private String id;
+
+    private Long createdOn;
 
     @Column(unique = true)
     @NaturalId(mutable = true)
@@ -61,6 +64,7 @@ public class ProfileModel {
 
     private Boolean isAffiliate;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     private AffiliateUserModel affiliateUser;
 
