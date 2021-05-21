@@ -16,12 +16,17 @@ import java.util.List;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/store/categories/")
+@RequestMapping("/api/store/categories")
 public class ShopCategoryController {
     private final ShopCategoryService shopCategoryService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ShopCategoryResponse>>> getCategories(){
         return shopCategoryService.getCategories();
+    }
+
+    @GetMapping("/brands")
+    public ResponseEntity<ApiResponse<List<String>>> getBrands(){
+        return shopCategoryService.getBrands();
     }
 }
