@@ -1,6 +1,7 @@
 package com.zaatun.zaatunecommerce.dto.response.shop;
 
 
+import com.zaatun.zaatunecommerce.model.ProductAttributesModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +31,7 @@ public class ShopProductResponseV2 {
     private List<ShopVariationResponse> variations;
 
     private Double reviewStar;
+
+    private List<ProductAttributesModel> attributes;
 
 }

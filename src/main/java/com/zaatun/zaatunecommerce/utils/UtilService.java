@@ -1,4 +1,4 @@
-package com.zaatun.zaatunecommerce.service;
+package com.zaatun.zaatunecommerce.utils;
 
 import com.zaatun.zaatunecommerce.dto.BasicTableInfo;
 import com.zaatun.zaatunecommerce.dto.request.ProductQuantityRequest;

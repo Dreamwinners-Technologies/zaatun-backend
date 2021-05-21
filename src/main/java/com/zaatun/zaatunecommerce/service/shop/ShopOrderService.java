@@ -6,12 +6,11 @@ import com.zaatun.zaatunecommerce.dto.request.shop.OrderPlaceRequest;
 import com.zaatun.zaatunecommerce.dto.request.shop.OrderProductRequest;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProcessHistoryResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderProductResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopOrderResponse;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.*;
-import com.zaatun.zaatunecommerce.service.UtilService;
+import com.zaatun.zaatunecommerce.utils.UtilService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @AllArgsConstructor
 @Service

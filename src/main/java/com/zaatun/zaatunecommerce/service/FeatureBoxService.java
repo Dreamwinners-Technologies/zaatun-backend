@@ -6,6 +6,7 @@ import com.zaatun.zaatunecommerce.dto.request.EditFeatureBoxRequest;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.FeatureBoxModel;
 import com.zaatun.zaatunecommerce.repository.FeatureBoxRepository;
+import com.zaatun.zaatunecommerce.utils.ImageUtilService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;

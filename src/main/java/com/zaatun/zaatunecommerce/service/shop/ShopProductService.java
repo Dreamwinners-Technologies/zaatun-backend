@@ -218,7 +218,7 @@ public class ShopProductService {
             ShopProductResponseV2 shopProductResponseV2 = new ShopProductResponseV2(productModel.getProductName(),
                     productModel.getProductSlug(), productModel.getProductBadge(), productModel.getBrand(),
                     productModel.getShortDescription(), productModel.getInStock(), productModel.getProductImages(),
-                    shopVariationResponses, reviewStar);
+                    shopVariationResponses, reviewStar, productModel.getProductAttributeModels());
 
             shopProductResponseV2s.add(shopProductResponseV2);
         }

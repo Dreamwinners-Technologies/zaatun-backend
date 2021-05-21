@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -52,7 +53,7 @@ public class OrderController {
     @PostMapping("/status/{orderId}")
     public ResponseEntity<ApiResponse<String>> addOrderStatus(@RequestHeader(name = "Authorization") String token,
                                          @PathVariable String orderId,
-                                         @RequestBody OrderProcessRequest orderProcessRequest){
+                                         @Valid @RequestBody OrderProcessRequest orderProcessRequest){
         return orderService.addOrderStatus(token, orderId, orderProcessRequest);
     }
 

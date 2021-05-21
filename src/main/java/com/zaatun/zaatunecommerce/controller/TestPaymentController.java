@@ -1,13 +1,18 @@
 package com.zaatun.zaatunecommerce.controller;
 
+import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.sslComPay.SSLCommerz;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -18,12 +23,11 @@ import java.util.UUID;
 public class TestPaymentController {
 
 
-
     @PostMapping("/init")
     public String initPayment() throws Exception {
-        String trxId = UUID.randomUUID().toString().toUpperCase().substring(0,11);
+        String trxId = UUID.randomUUID().toString().toUpperCase().substring(0, 11);
 
-        SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9","dokan6070563821cf9@ssl", true);
+        SSLCommerz sslCommerz = new SSLCommerz("dokan6070563821cf9", "dokan6070563821cf9@ssl", true);
 
         Map<String, String> postData = new HashMap<>();
 
@@ -50,7 +54,30 @@ public class TestPaymentController {
 
 //        sslCommerz.(postData,false)
 
-        return sslCommerz.initiateTransaction(postData,false);
+        return sslCommerz.initiateTransaction(postData, false);
+    }
+
+    private final JavaMailSender javaMailSender;
+
+    @PostMapping("/sendMail")
+    public ResponseEntity<ApiResponse<String>> sendMailTest(@RequestParam String email,
+                                                            @RequestParam String text,
+                                                            @RequestParam String subject)
+            throws MessagingException, UnsupportedEncodingException {
+        MimeMessage msg = javaMailSender.createMimeMessage();
+
+        MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+        helper.setFrom("zaatundevteam@gmail.com", "Zaatun Dev Team");
+
+        helper.setTo(email);
+
+        helper.setSubject(subject);
+
+        helper.setText(text, true);
+
+        javaMailSender.send(msg);
+        return new ResponseEntity<>(new ApiResponse<>(200, "OK", "Send to " + email), HttpStatus.OK);
+
     }
 
 }

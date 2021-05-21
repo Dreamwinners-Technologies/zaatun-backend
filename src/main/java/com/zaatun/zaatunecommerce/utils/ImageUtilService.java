@@ -1,4 +1,4 @@
-package com.zaatun.zaatunecommerce.service;
+package com.zaatun.zaatunecommerce.utils;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

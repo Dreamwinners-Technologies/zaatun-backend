@@ -5,6 +5,8 @@ import lombok.*;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 @Data
 @Builder
@@ -16,10 +18,13 @@ public class ShortStatisticsModel {
     @Id
     private Integer id;
 
+    @PositiveOrZero
     private Integer totalOrders;
 
+    @PositiveOrZero
     private Integer pendingOrders;
 
+    @PositiveOrZero
     private Integer processingOrders;
 
     private Integer shippedOrders;
@@ -38,6 +43,7 @@ public class ShortStatisticsModel {
 
     private Integer affiliateWithdrawCompleted;
 
+    @PositiveOrZero
     private Integer totalProducts;
 
     private Integer totalUsers;
