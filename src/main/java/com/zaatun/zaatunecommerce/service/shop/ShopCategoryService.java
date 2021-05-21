@@ -58,7 +58,7 @@ public class ShopCategoryService {
 
         Set<String> brands = new HashSet<>();
         for (ProductModel productModel: productModels){
-            brands.add(productModel.getBrand());
+            brands.add(productModel.getBrand().toLowerCase());
         }
 
         List<String> brandList = new ArrayList<>(brands);
