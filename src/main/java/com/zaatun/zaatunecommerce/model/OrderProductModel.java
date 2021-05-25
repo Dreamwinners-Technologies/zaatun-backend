@@ -32,10 +32,12 @@ public class OrderProductModel {
 
     private String subCategoryName;
 
+    @Column(columnDefinition="TEXT")
     private String shortDescription;
 
     private Double vat;
 
+    @Column(columnDefinition="TEXT")
     private String deliveryInfo;
 
     @CollectionTable
@@ -44,6 +46,7 @@ public class OrderProductModel {
 
     private Integer quantity;
 
+    @Column(columnDefinition="TEXT")
     private String variation;
 
     private Integer price;
