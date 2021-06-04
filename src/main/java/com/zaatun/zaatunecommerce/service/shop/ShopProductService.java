@@ -2,6 +2,7 @@ package com.zaatun.zaatunecommerce.service.shop;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
+import com.zaatun.zaatunecommerce.dto.request.shop.ProductSortBy;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponseV2;
@@ -179,7 +180,7 @@ public class ShopProductService {
     public ResponseEntity<ApiResponse<PaginationResponse<List<ShopProductResponseV2>>>> getProductsV2(
             String productName, String brand, String categorySlug, String subCategorySlug, String productSlug,
             Boolean inStock, Boolean isFeatured, String processor, String battery, String ram, String rom,
-            String screenSize, String backCamera, String frontCamera, String sortBy, Sort.Direction orderBy,
+            String screenSize, String backCamera, String frontCamera, ProductSortBy sortBy, Sort.Direction orderBy,
             int pageSize, int pageNo, Integer rating, String token) {
 
         String userId = null;
@@ -189,7 +190,7 @@ public class ShopProductService {
 
         //Example Specification for filtering
         ProductModel exProduct = getExampleProductModel(productName, brand, categorySlug, subCategorySlug, productSlug, inStock, isFeatured, processor, battery, ram, rom, screenSize, backCamera, frontCamera);
-        Page<ProductModel> productModelPage = getProductsFromDb(sortBy, orderBy, pageSize, pageNo, exProduct);
+        Page<ProductModel> productModelPage = getProductsFromDb(sortBy.toString(), orderBy, pageSize, pageNo, exProduct);
 
         //Getting only the products
         List<ProductModel> productModels = productModelPage.getContent();

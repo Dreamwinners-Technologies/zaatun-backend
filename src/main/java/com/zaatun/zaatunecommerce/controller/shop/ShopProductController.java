@@ -2,6 +2,7 @@ package com.zaatun.zaatunecommerce.controller.shop;
 
 import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
+import com.zaatun.zaatunecommerce.dto.request.shop.ProductSortBy;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
 import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponseV2;
@@ -48,7 +49,7 @@ public class ShopProductController {
             Boolean inStock, Boolean isFeatured, String processor,
             String battery, String ram,
             String rom, String screenSize, String backCamera, String frontCamera,
-            @RequestParam(defaultValue = "createdOn") String sortBy,
+            @RequestParam(defaultValue = "createdOn") ProductSortBy sortBy,
             @RequestParam(defaultValue = "ASC") Sort.Direction orderBy,
             @RequestParam(defaultValue = "50") int pageSize,
             @RequestParam(defaultValue = "0") int pageNo,
