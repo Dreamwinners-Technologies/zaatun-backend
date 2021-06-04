@@ -33,7 +33,7 @@ public class ShopProductResponse {
 
     private ShopSubCategoryResponse subCategory;
 
-    private String description;
+//    private String description;
 
     private String shortDescription;
 

@@ -4,9 +4,7 @@ import com.zaatun.zaatunecommerce.dto.ApiResponse;
 import com.zaatun.zaatunecommerce.dto.request.shop.AddReviewRequest;
 import com.zaatun.zaatunecommerce.dto.request.shop.ProductSortBy;
 import com.zaatun.zaatunecommerce.dto.response.PaginationResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponse;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopProductResponseV2;
-import com.zaatun.zaatunecommerce.dto.response.shop.ShopVariationResponse;
+import com.zaatun.zaatunecommerce.dto.response.shop.*;
 import com.zaatun.zaatunecommerce.jwt.security.jwt.JwtProvider;
 import com.zaatun.zaatunecommerce.model.*;
 import com.zaatun.zaatunecommerce.repository.AffiliateUserRepository;
@@ -196,18 +194,18 @@ public class ShopProductService {
         List<ProductModel> productModels = productModelPage.getContent();
 
         List<ShopProductResponseV2> shopProductResponseV2s = new ArrayList<>();
-        for (ProductModel productModel: productModels){
+        for (ProductModel productModel : productModels) {
             int totalReview = 0;
             Integer totalReviewStar = 0;
-            for (ProductReviewModel productReviewModel: productModel.getProductReviews()){
+            for (ProductReviewModel productReviewModel : productModel.getProductReviews()) {
                 totalReview++;
                 totalReviewStar += productReviewModel.getReviewStar();
             }
-            Double reviewStar =  (double)totalReviewStar / (double)totalReview;
+            Double reviewStar = (double) totalReviewStar / (double) totalReview;
 
             List<ShopVariationResponse> shopVariationResponses = new ArrayList<>();
 
-            for (ProductVariationModel productVariationModel: productModel.getVariations()){
+            for (ProductVariationModel productVariationModel : productModel.getVariations()) {
                 ShopVariationResponse shopVariationResponse = new ShopVariationResponse(productVariationModel.getId(),
                         productVariationModel.getStock(), productVariationModel.getInStock(), productVariationModel.getIsDefault(),
                         productVariationModel.getRegularPrice(), productVariationModel.getDiscountPrice(),
@@ -216,10 +214,27 @@ public class ShopProductService {
                 shopVariationResponses.add(shopVariationResponse);
             }
 
+            CategoryModel categoryModel = productModel.getCategoryModel();
+
+            //Migrating from CategoryModel to ShopCategoryResponse
+            ShopCategoryResponse shopCategoryResponse = new ShopCategoryResponse(
+                    categoryModel.getCategoryName(), categoryModel.getCategoryIcon(),
+                    categoryModel.getCategorySlug(), categoryModel.getCategoryImage(),
+                    categoryModel.getVerticalImage(), null);
+
+            //Getting the SubCategoryModel from the ProductModel
+            SubCategoryModel subCategoryModel = productModel.getSubCategoryModel();
+
+            //Migrating from SubCategoryModel to ShopSubCategoryResponse
+            ShopSubCategoryResponse shopSubCategoryResponse = new ShopSubCategoryResponse(
+                    subCategoryModel.getSubCategoryName(), subCategoryModel.getSubCategoryIcon(),
+                    subCategoryModel.getSubCategorySlug(), subCategoryModel.getSubCategoryImage());
+
             ShopProductResponseV2 shopProductResponseV2 = new ShopProductResponseV2(productModel.getProductName(),
                     productModel.getProductSlug(), productModel.getProductBadge(), productModel.getBrand(),
                     productModel.getShortDescription(), productModel.getInStock(), productModel.getProductImages(),
-                    shopVariationResponses, reviewStar, productModel.getProductAttributeModels());
+                    shopVariationResponses, reviewStar, productModel.getProductAttributeModels(), shopCategoryResponse,
+                    shopSubCategoryResponse);
 
             shopProductResponseV2s.add(shopProductResponseV2);
         }
@@ -276,6 +291,20 @@ public class ShopProductService {
                 .isFeatured(isFeatured)
                 .specification(exSpecification)
                 .build();
+    }
+
+    public ResponseEntity<ApiResponse<String>> getProductDetailsBySlug(String productSlug) {
+        Optional<ProductModel> productModelOptional = productRepository.findByProductSlug(productSlug);
+        if(productModelOptional.isPresent()){
+            ProductModel productModel = productModelOptional.get();
+
+            String productDetails = productModel.getDescription();
+
+            return new ResponseEntity<>(new ApiResponse<>(200, "Details found", productDetails), HttpStatus.OK);
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Product Details found with slug: "+productSlug);
+        }
     }
 }
 

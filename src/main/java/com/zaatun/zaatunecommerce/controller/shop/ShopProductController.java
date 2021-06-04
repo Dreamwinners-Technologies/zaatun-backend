@@ -70,6 +70,12 @@ public class ShopProductController {
         return shopProductService.getProductBySlug(productSlug, affiliateUserSlug, token);
     }
 
+    @GetMapping("/{productSlug}/details")
+    public ResponseEntity<ApiResponse<String>> getProductDetailsBySlug(@PathVariable String productSlug) {
+
+        return shopProductService.getProductDetailsBySlug(productSlug);
+    }
+
     @PostMapping("/{productSlug}/review")
     public ResponseEntity<ApiResponse<String>> addReview(@RequestHeader(name = "Authorization") String token,
                                                          @PathVariable String productSlug,

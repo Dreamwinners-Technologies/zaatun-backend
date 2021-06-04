@@ -34,4 +34,8 @@ public class ShopProductResponseV2 {
 
     private List<ProductAttributesModel> attributes;
 
+    private ShopCategoryResponse category;
+
+    private ShopSubCategoryResponse subCategory;
+
 }

@@ -82,7 +82,7 @@ public class ShopProductHelperService {
         //Adding Data to ShopProductResponse from ProductModel
         ShopProductResponse shopProductResponse = new ShopProductResponse(productModel.getProductName(),
                 productModel.getProductSlug(), productModel.getProductBadge(), productModel.getSKU(), productModel.getBrand(), shopCategoryResponse,
-                shopSubCategoryResponse, productModel.getDescription(), productModel.getShortDescription(), productModel.getWarranty(),
+                shopSubCategoryResponse, productModel.getShortDescription(), productModel.getWarranty(),
                 productModel.getEmi(), productModel.getInStock(), productModel.getIsFeatured(),
                 productModel.getIsDiscount(), productModel.getVideoUrl(), productModel.getVat(),
                 productModel.getProductImages(), productModel.getSpecification(), null, productModel.getProductAttributeModels(),
